@@ -1,0 +1,242 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                       MARKDOWNLINT-CLI2 CONFIGURATION FILE                                         //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+{
+  // Main markdownlint-cli2 configuration
+
+  "config": 
+  {
+
+    // Rule code
+
+    "MD001": true,   // Heading levels should only increment by one level at a time.
+
+    "MD003": 
+    {
+      "style": "consistent"  // Heading style
+    },
+
+    "MD004": false,   // Unordered list style
+
+    "MD005": true,   // Inconsistent indentation for list items at the same level.
+
+    "MD007": 
+    {
+      "indent": 2,              // Tabs are worth two spaces.
+      "start_indent": 2,        // First indent of text.
+      "start_indented": false   // Automatically indent.
+    },
+
+    "MD009": 
+    {
+      "br_spaces": 2,                   // Spaces before line break.
+      "list_item_empty_lines": false,   // Disallow spaces on empty lines.  
+      "strict": true                    // Disable unnecessary line breaks.
+    },
+
+    "MD010": 
+    {
+      "code_blocks": true,          // Allow code blocks.
+      "ignore_code_languages": [],  // Languages to ignore.
+      "spaces_per_tab": 1           // Number of spaces per tab in code blocks    
+    },
+
+    "MD011": true,   // Reversed link syntax
+
+    "MD012": 
+    {
+      "maximum": 1  // Number of blank lines before more content is expected.
+    },
+
+    "MD013": 
+    {
+      "code_block_line_length": 120,    // Code block line length can be no longer than 120 characters.
+      "code_blocks": true,              // Allow code blocks.
+      "heading_line_length": 120,       // Heading line length can be no longer than 120 characters.
+      "headings": true,                 // Allow headings.
+      "line_length": 120,               // Line length can be no longer than 120 characters.
+      "stern": true,                    // Enforce stern linting.
+      "strict": true,                   // Enforce line character limits.
+      "tables": true                    // Allow tables.
+    },
+
+    "MD014": true,   // Dollar signs used before commands without showing output.
+    "MD018": true,   // No space after hash on atx style heading.
+    "MD019": true,   // Multiple spaces after hash on atx style heading.
+    "MD020": true,   // No space inside hashes on closed atx style heading.
+    "MD021": true,   // Multiple spaces inside hashes on closed atx style heading.
+
+    "MD022": 
+    {
+      "lines_above": 1,
+      "lines_below": 1   // Headings should be surrounded by blank lines.
+    },
+
+    "MD023": true,   // Headings must start at the beginning of the line.
+
+    "MD024": 
+    {
+      "siblings_only": false  // Disallow duplicate headings.
+    },
+
+    "MD025": 
+    {
+      "front_matter_title": "^\\s*title\\s*[:=]",   // Provides regEx mask for titles.
+      "level": 1                                    // Allow only one main heading.
+    },
+
+    "MD026": 
+    {
+      "punctuation": ".,;:!。，；：！"  // Prevents the following characters from being used trailing a heading.
+    },
+
+    "MD027": true,   // Multiple spaces after blockquote symbol.
+    "MD028": true,   // Blank line inside block quote.
+
+    "MD029": 
+    {
+      "style": "one_or_ordered"  // Ordered list item prefix.
+    },
+
+    "MD030": 
+    {
+      "ol_multi": 1,   // Spaces after list markers.
+      "ol_single": 1,
+      "ul_multi": 1,
+      "ul_single": 1
+    },
+
+    "MD031": 
+    {
+      "list_items": true  // Fenced code blocks should be surrounded by blank lines.
+    },
+
+    "MD032": true,   // Lists should be surrounded by blank lines.
+
+    "MD033": 
+    {
+      "allowed_elements": []  // Allows all HTML elements.
+    },
+
+    "MD034": true,   // Bare URL used.
+
+    "MD035": 
+    {
+      "style": "consistent"  // Horizontal rule style.
+    },
+
+    "MD036": 
+    {
+      "punctuation": ".,;:!?。，；：！？"  // Emphasis used instead of a heading.
+    },
+
+    "MD037": true,   // Spaces inside emphasis markers.
+    "MD038": true,   // Spaces inside code span elements.
+    "MD039": true,   // Spaces inside link text.
+
+    "MD040": 
+    {
+      "allowed_languages": [],    // Allowed languages set explicitly left blank to allow all languages.
+      "language_only": false  // Allows for all languages.
+    },
+
+    "MD041": 
+    {
+      "front_matter_title": "^\\s*title\\s*[:=]",  // Regex mask for front matter title.
+      "level": 1
+    },
+
+    "MD042": true,   // No empty links.
+    
+    // MD043/required-headings : Required heading structure : https://github.com/DavidAnson/markdownlint/blob/v0.37.4/doc/md043.md
+
+    //"MD043": 
+    //{
+    //    "headings": [],     // List of headings
+    //    "match_case": true  // Match case of headings
+    //},
+
+    "MD044": 
+    {
+      "code_blocks": true,
+      "html_elements": true,
+      "names": ["JavaScript", "JAVASCRIPT", "javascript"]   // Proper names should have the correct capitalization.
+    },
+
+    "MD045": true,   // Images should have alternate text (alt text).
+
+    "MD046": 
+    {
+      "style": "consistent"  // Code block style.
+    },
+
+    "MD047": true,   // Files should end with a single newline character.
+
+    "MD048": 
+    {
+      "style": "consistent"  // Code fence style.
+    },
+
+    "MD049": 
+    {
+      "style": "consistent"  // Emphasis style.
+    },
+
+    "MD050": 
+    {
+      "style": "consistent"  // Strong style.
+    },
+
+    "MD051": true,   // Link fragments should be valid.
+
+    "MD052": 
+    {
+      "shortcut_syntax": false  // Reference links and images should use a label that is defined.
+    },
+
+    "MD053": 
+    {
+      "ignored_definitions": ["//"]  // Prevents things like URLs from triggering an error.
+    },
+
+    "MD054": 
+    {
+      "autolink": true,
+      "collapsed": true,
+      "full": true,
+      "inline": true,
+      "shortcut": true,
+      "url_inline": true
+    },
+
+    "MD055": 
+    {
+      "style": "consistent"  // Table pipe style.
+    },
+
+    "MD056": true,  // Table column count.
+  
+    "MD058": true,
+    "MD059": true,
+    "MD060": 
+    {
+      "style": "aligned"
+    }
+  },
+  // Custom rules
+
+  "customRules": 
+  [
+    //"custom-markdownlint-rules/capitalised-headings.js"
+  ],
+  
+  // Paths and files to ignore
+
+  "ignores": 
+  [
+    "node_modules/**",
+    "CHANGELOG.md",
+    ".git/**"
+  ]
+}

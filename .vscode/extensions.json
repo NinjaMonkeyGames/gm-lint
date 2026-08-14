@@ -1,0 +1,16 @@
+{
+  "recommendations": 
+    [
+      "streetsidesoftware.code-spell-checker",
+      "streetsidesoftware.code-spell-checker-cspell-bundled-dictionaries",
+      "github.vscode-github-actions",
+      "yzhang.markdown-all-in-one",
+      "davidanson.vscode-markdownlint",
+      "redhat.vscode-yaml",
+      "joshbolduc.commitlint",
+      "wmaurer.change-case",
+      "dbaeumer.vscode-eslint",
+      "fnando.linter",
+      "catspeak.catspeak-vscode"
+    ]
+}

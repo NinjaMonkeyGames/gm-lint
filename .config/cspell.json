@@ -1,0 +1,43 @@
+{
+  "files": [
+    "**/*.md",
+    "**/*.rtf",
+    "**/*.txt",
+    "**/*.text",
+    "**/*.html",
+    "**/*.css"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    ".git/**",
+    ".gitignore"
+  ],
+  "language": "en-gb",
+  "version": "0.2",
+  "words": [
+    "allman",
+    "buildx",
+    "commitlint",
+    "cooldown",
+    "cves",
+    "davidanson",
+    "dbaeumer",
+    "Dockerfiles",
+    "dockerhub",
+    "EDITMSG",
+    "exiasr",
+    "fnando",
+    "GAMEMAKER",
+    "GITFLOW",
+    "handpoint",
+    "joshbolduc",
+    "linelist",
+    "linters",
+    "LMDE",
+    "monkeyknuckles",
+    "tsrc",
+    "vbuff",
+    "vformat",
+    "yzhang"
+  ]
+}

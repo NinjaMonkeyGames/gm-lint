@@ -1,0 +1,84 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                    IDE SETTINGS                                                    //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 1. Automatic actions.
+// 2. Add a visible ruler to the IDE.
+// 3. Format settings.
+// 4. Confirmation settings.
+// 5. Mardown settings.
+// 5. Include otherwise hidden folders in the file tree view.
+// 6. Include otherwise excluded files in the project file search.
+// 7. Start Terminal in Bash.
+// 8. Automatically format JSON files on save.
+// 9. Set commitlint config path.
+// 10. Markdown settings.
+{
+  // Automatic Actions
+
+  "editor.formatOnSave": true, // Automatically format files when saving
+  "editor.formatOnType": true, // Automatically format code as you type
+
+  // Add a Visible Ruler to the IDE
+
+  "editor.rulers":
+  [
+    120 // set ruler width to 120 characters
+  ],
+
+  "editor.wordWrap": "wordWrapColumn", // Automatically wrap lines of text
+  "editor.wordWrapColumn": 120, // Set the wrap column to 120 characters
+
+  // Format Settings
+
+  "editor.wrappingIndent": "same", // Keep indentation level of wrapped lines
+
+  // Confirmation Settings
+
+  "explorer.confirmDelete": false, // Prevents prompt when deleting files
+  "explorer.confirmDragAndDrop": false, // Prevents prompt when moving files
+  "files.autoSave": "afterDelay", // All file changes will be saved periodically
+  "files.autoSaveDelay": 1000, // Set autosave delay for 1000 milliseconds
+  "files.eol": "\n", // Force all new files to be in LF format opposed to CRLF
+
+  // Include Otherwise Hidden Folders In The File Tree View
+
+  "files.exclude":
+  {
+    "**/.git": false, // Show .git folder
+    "**/node_modules": false // Show node_modules
+  },
+
+  // Include Otherwise Excluded Files In Project File Search
+
+  "search.exclude": 
+  {
+    "**/.git": false, // Include (Exclude) .git folder
+    "**/node_modules": false // Include (Exclude) node_modules folder
+  },
+
+  // Start Terminal in Bash
+
+  "terminal.integrated.defaultProfile.linux": "bash",
+
+  // Automatically format JSON files on save
+
+  "json.format.enable": false,
+
+  // Set commitlint config path
+
+  "commitlint.config.file": ".config/commitlint.config.js",
+  
+  // Markdown Settings
+
+  "[markdown]": 
+  {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+    "editor.formatOnSave": true
+  },
+
+  "markdown.extension.toc.updateOnSave": true, // Automatically update the TOC when saving markdown files
+  "markdownlint.configFile": ".config/.markdownlint-cli2.jsonc", // Set markdownlint config path
+}
+
+

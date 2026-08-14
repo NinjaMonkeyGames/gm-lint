@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "@commitlint/config-conventional": "^20.3.0",
+    "ci": "^2.3.0",
+    "commitlint": "^21.2.1",
+    "cspell": "^10.0.1",
+    "markdownlint": "^0.41.0",
+    "markdownlint-cli2": "^0.23.0",
+    "npm": "^11.18.0"
+  },
+  "name": "gm-lint",
+  "type": "module",
+  "version": "0.1.0"
+}
