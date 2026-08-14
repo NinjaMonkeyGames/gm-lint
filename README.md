@@ -17,6 +17,7 @@
   - [WHO IS THIS REPOSITORY FOR ?](#who-is-this-repository-for-)
   - [QUICKSTART](#quickstart)
   - [API OVERVIEW](#api-overview)
+    - [RULES](#rules)
   - [ENVIRONMENT DEPENDENCY MANIFESTO](#environment-dependency-manifesto)
     - [IDE](#ide)
       - [VSC (Visual Studio Codium)](#vsc-visual-studio-codium)
@@ -42,7 +43,7 @@ IDE.
 This project is an attempt to implement all GM00X feather message lints in a CI workflow.
 
 - To assist GameMaker developers produce clean, reliable and professional code.
-- To fill a gap in the GameMaker space.
+- To fill a gap in the GameMaker workflow space.
 
 ---
 
@@ -57,17 +58,138 @@ This project is for anyone who wants a mechanism for linting GML code in a CI wo
 gm-lint
 
 --help
+--version
 --config
-
 
 ---
 
 ## API OVERVIEW
 
-| Method                    | Description                                                                 |
-|---------------------------|-----------------------------------------------------------------------------|
-| `get_x([_x])`             | Returns the column index under the given X coordinate (mouse X by default). |
+ Default: Run `gm-lint` this with no other flags it will search project for config and GM files.
 
+| Optional parameters       | Description                                                                 |
+|---------------------------|-----------------------------------------------------------------------------|
+| `--config`                | Set path to configuration file.                                             |
+| `--help`                  | Display help text.                                                          |
+| `--version`               | Show latest version.                                                        |
+
+### RULES
+
+| GM Number | Description                                                                                              |
+|-----------|----------------------------------------------------------------------------------------------------------|
+| GM1000    | No enclosing loop from which to break.                                                                   |
+| GM1001    | No enclosing loop from which to continue.                                                                |
+| GM1002    | globalvar does not support inline initializers.                                                          |
+| GM1003    | Enum assignment must be integer assignment.                                                              |
+| GM1004    | The enum value 'ENUM MEMBER NAME' has already been previously defined in the enum 'ENUM NAME'.           |
+| GM1005    | Argument must be provided.                                                                               |
+| GM1006    | The enum 'ENUM NAME' has already been previously declared.                                               |
+| GM1007    | Left-hand side of an assignment must be a variable.                                                      |
+| GM1008    | The variable 'BUILT-IN VARIABLE' is readonly and cannot be assigned to.                                  |
+| GM1009    | Operation OPERATOR between types 'TYPE' and 'TYPE' may result in unexpected behaviour or an error during |
+|           | runtime.                                                                                                 |
+| GM1010    | Cannot perform OPERATOR operation between types 'TYPE' and 'TYPE'.                                       |
+| GM1011    | Implicit cast of type 'TYPE' to 'Bool' may result in unexpected behaviour or an error during runtime.    |
+| GM1012    | Malformed variable addressing expression.                                                                |
+| GM1013    | Reference to variable 'IDENTIFIER' which has not been previously declared in 'IDENTIFIER'.               |
+| GM1014    | The enum 'ENUM' does not contain the value 'IDENTIFIER'.                                                 |
+| GM1015    | Cannot divide or modulo expression by 0.                                                                 |
+| GM1016    | A boolean literal was unexpected at this time.                                                           |
+| GM1017    | The function 'FUNCTION NAME' is deprecated and usage is discouraged.                                     |
+| GM1019    | The function 'FUNCTION NAME' takes no more than NUMBER arguments but NUMBER are provided.                |
+| GM1020    | The function 'FUNCTION NAME' takes no less than NUMBER arguments but NUMBER are provided.                |
+| GM1021    | The function or script 'FUNCTION/SCRIPT NAME' does not exist.                                            |
+| GM1022    | An assignment was expected at this time.                                                                 |
+| GM1023    | The constant 'BUILT-IN CONSTANT' is deprecated and usage is discouraged.                                 |
+| GM1024    | The built-in variable 'BUILT-IN VARIABLE' is deprecated and usage is discouraged.                        |
+| GM1025    | A number literal was unexpected at this time.                                                            |
+| GM1026    | Left-hand side of postfix expression must be a variable.                                                 |
+| GM1027    | A string literal was unexpected at this time.                                                            |
+| GM1028    | Accessor is intended for type of 'TYPE' but 'TYPE' appears instead.                                      |
+| GM1029    | Potentially dangerous or unintended implicit cast from 'TYPE' to 'TYPE'.                                 |
+| GM1030    | The identifier 'NAME' is reserved and cannot be used as a variable or macro name.                        |
+| GM1031    | The name 'IDENTIFIER' is an asset or constant and cannot be assigned to.                                 |
+| GM1032    | No references to arguments INDEX, … but references argument INDEX.                                       |
+| GM1033    | Possibly unintended or misplaced semicolon.                                                              |
+| GM1034    | Argument cannot be referenced outside of script or function.                                             |
+| GM1035    | Return type differs from previously established return type.                                             |
+| GM1036    | Array cannot be indexed in this way.                                                                     |
+| GM1038    | Macro with this name has been previously declared.                                                       |
+| GM1040    | argument# and argument[#] referencing cannot be mixed.                                                   |
+| GM1041    | The type 'TYPE' appears where the type 'TYPE' is expected.                                               |
+| GM1042    | Parameter name 'PARAMETER' differs from 'PARAMETER' specified in jsdoc.                                  |
+| GM1043    | Potentially unintentional type reassignment from '{0}' to '{1}'.                                         |
+| GM1044    | Constant is expected to be one of the following: {0}.                                                    |
+| GM1045    | Type '{0}' differs from type '{1}' specified in jsdoc.                                                   |
+| GM1050    | The identifier '{0}' is declared as a local variable and cannot be accessed in this way.                 |
+| GM1051    | Macro expressions should not be terminated with a ';' semicolon.                                         |
+| GM1052    | The delete operator can only act on a variable of type 'struct'.                                         |
+| GM1054    | Cannot inherit from non-existent function '{0}'.                                                         |
+| GM1055    | Cannot mix argument# and named parameters.                                                               |
+| GM1056    | Bad practice to declare non-optional parameter after an optional parameter.                              |
+| GM1058    | Cannot 'new' the identifier '{0}' as it is not a constructor function.                                   |
+| GM1059    | The parameter '{0}' has been previously declared.                                                        |
+| GM1060    | Dangerous call to variable of type '{0}'.                                                                |
+| GM1062    | Malformed type '{0}' in jsdoc.                                                                           |
+| GM1063    | Ternary may yield differing types '{0}' and '{1}'.                                                       |
+| GM1064    | Redeclaration of global function '{0}' originally declared in '{1}'.                                     |
+| GM1100    | Syntax Error.                                                                                            |
+| GM2000    | Not all code paths call gpu_set_blendmode(bm_normal) before the end of the script.                       |
+| GM2003    | Not all code paths call shader_reset() before end of script.                                             |
+| GM2004    | This for statement does not use its index and can be written as a repeat statement instead.              |
+| GM2005    | Not all code paths call surface_reset_target() before end of script.                                     |
+| GM2007    | var expression should be terminated with a ';' (semicolon).                                              |
+| GM2008    | Opening another vertex batch before closing a previous vertex batch.                                     |
+| GM2009    | Closing a vertex batch without opening a vertex batch.                                                   |
+| GM2010    | The function '{0}' cannot be called outside of a vertex_begin()/vertex_end() block.                      |
+| GM2011    | Not all code paths call vertex_end() before the end of the script.                                       |
+| GM2012    | Opening another vertex format before closing a previous vertex format.                                   |
+| GM2013    | Closing a vertex format without opening a vertex format.                                                 |
+| GM2014    | The function '{0}' cannot be called outside of a vertex_format_begin()/vertex_format_end() block.        |
+| GM2015    | Not all code paths call vertex_format_end() before the end of the script.                                |
+| GM2016    | Instance variable '{0}' declared outside of Create event, declare with 'var' or move to Create event.    |
+| GM2017    | Inconsistent naming. Recommended name is '{0}'.                                                          |
+| GM2018    | Potentially dangerous variable declaration.                                                              |
+| GM2019    | Not all code paths call draw_set_valign(fa_top) before the end of the script.                            |
+| GM2020    | all cannot be referenced in this way.                                                                    |
+| GM2022    | Return value of a pure function is not being used.                                                       |
+| GM2023    | Evaluation order of function calls in argument list not guaranteed between platforms.                    |
+| GM2025    | Reference to non-existent event '{0}'.                                                                   |
+| GM2026    | Not all code paths call draw_set_halign(fa_left) before the end of the script.                           |
+| GM2027    | Opening another primitive before closing a previous primitive.                                           |
+| GM2028    | Closing a primitive without opening a primitive.                                                         |
+| GM2029    | The function '{0}' cannot be called outside of a draw_primitive_begin()/draw_primitive_end() block.      |
+| GM2030    | Not all code paths call draw_primitive_end() before the end of the script.                               |
+| GM2031    | Opening another File Find before closing a previous File Find.                                           |
+| GM2032    | Closing a File Find without opening a File Find.                                                         |
+| GM2033    | The function '{0}' cannot be called outside of a file_find_first()/file_find_close() block.              |
+| GM2034    | Not all code paths call file_find_close() before the end of the script.                                  |
+| GM2035    | Not all code paths call gpu_pop_state() before end of script.                                            |
+| GM2039    | Call to execute a global script resource like a function is deprecated.                                  |
+| GM2040    | Call to event_inherited() in object with no parent event.                                                |
+| GM2042    | Inconsistent stack depth for gpu_push_state()/gpu_pop_state() blocks. All branches should call these     |
+|           | functions an equal number of times.                                                                      |
+| GM2043    | Attempting to access the local variable '{0}' outside of the scope it was defined in.                    |
+| GM2044    | Local variable '{0}' is already declared.                                                                |
+| GM2046    | Inconsistent stack depth for surface_set_target()/surface_reset_target() blocks. All branches should call|
+|           | these functions the same number of times.                                                                |
+| GM2047    | Unreachable code.                                                                                        |
+| GM2048    | Not all code paths call gpu_set_blendenable(true) before the end of the script.                          |
+| GM2049    | Not all code paths call gpu_set_zfunc(cmpfunc_lessequal) before the end of the script.                   |
+| GM2050    | Not all code paths call gpu_set_fog(false, c_black, 0, 1) before the end of the script.                  |
+| GM2051    | Not all code paths call gpu_set_cullmode(cull_noculling) before the end of the script.                   |
+| GM2052    | Not all code paths call gpu_set_colourwriteenable(true, true, true, true) before the end of the script.  |
+| GM2053    | Not all code paths call gpu_set_alphatestenable(false) before the end of the script.                     |
+| GM2054    | Not all code paths call gpu_set_alphatestref(0) before the end of the script.                            |
+| GM2055    | Not all code paths call gpu_set_texfilter(false) before the end of the script.                           |
+| GM2056    | Not all code paths call gpu_set_texrepeat(false) before the end of the script.                           |
+| GM2061    | Opportunity to use nullish coalesce operator.                                                            |
+| GM2062    | Not all code paths call draw_set_colour(c_white) before the end of the script.                           |
+| GM2063    | Not all code paths call draw_set_alpha(1) before the end of the script.                                  |
+| GM2064    | Variable '{0}' does not exist in object's Variable Definitions.                                          |
+
+**ℹ️ GameMaker manual contains full descriptions for each rule.**
+[Feather Messages](https://manual.gamemaker.io/lts/en/The_Asset_Editors/Code_Editor_Properties/Feather_Messages.htm)
 
 ## ENVIRONMENT DEPENDENCY MANIFESTO
 
