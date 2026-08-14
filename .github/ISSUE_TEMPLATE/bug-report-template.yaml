@@ -1,0 +1,257 @@
+########################################################################################################################
+#                                                  BUG REPORT TEMPLATE                                                 #
+########################################################################################################################
+
+# 1.  Meta data.
+# 2.  Initialise form.
+# 3.  Introduction text.
+# 4.  Email input.
+# 5.  OS selection.
+# 6.  Browser selection.
+# 7.  Bug type.
+# 8.  Severity.
+# 9.  Problem summary.
+# 10. Expected behaviour.
+# 11. Steps to reproduce.
+# 12. Actual Behaviour.
+# 13. Additional Information.
+# 14. Agree to terms.
+
+# Meta Data
+
+name: 🐞 Bug Report
+description: File a bug report.
+title: "[Bug]: "
+labels: ["bug", "new"]
+projects: ["NinjaMonkeyGames/12"]
+
+# Initialise Form
+
+body:
+
+# Introduction Text
+
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this issue! Please fill out the form below to provide detailed information about the bug.
+
+# Email Input
+
+  - type: input
+    id: contact-email
+    attributes:
+      label: Contact Email
+      description: Please provide an email where we can reach you if more information is needed.
+      placeholder: email@example.com
+    validations:
+      required: true
+
+# OS Selection
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: true
+
+# Browser Selection
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      description: What browser are you using?
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Microsoft Edge
+        - Opera
+        - Other
+    validations:
+      required: true
+
+# Bug Type
+
+  - type: dropdown
+    id: bug-type
+    attributes:
+      label: Bug Type
+      description: Select the type of issue you are reporting.
+      options:
+        - Application Bug
+        - Documentation Problem
+    validations:
+      required: true 
+
+# Feather Message Code
+
+  - type: dropdown
+    id: feather-code
+    attributes:
+      label: Feather Message Code
+      description: Select the associated GM Feather message code if applicable.
+      options:
+        - N/A / None
+        # Syntax / Parsing Errors (GM1000 Series)
+        - GM1000 (Syntax error)
+        - GM1001 (Missing semicolon)
+        - GM1002 (Unexpected token)
+        - GM1003 (Unterminated string literal)
+        - GM1004 (Unterminated comment)
+        - GM1005 (Mismatched brackets/parentheses)
+        - GM1006 (Malformed expression)
+        - GM1007 (Invalid variable name)
+        - GM1008 (Assignment expected)
+        - GM1009 (Invalid assignment target)
+        - GM1010 (Invalid statement)
+        - GM1011 (Redeclaration of variable)
+        - GM1012 (Unreachable code)
+        - GM1013 (Missing return statement)
+        - GM1014 (Break outside of loop/switch)
+        - GM1015 (Continue outside of loop)
+        - GM1016 (Case outside of switch)
+        - GM1017 (Default outside of switch)
+        - GM1018 (Duplicate case label)
+        - GM1019 (Invalid enum declaration)
+        - GM1020 (Invalid struct declaration)
+        - GM1021 (Invalid constructor)
+        - GM1022 (Invalid macro definition)
+        - GM1023 (Invalid directive)
+        - GM1024 (Invalid function call)
+        - GM1025 (Invalid argument count)
+        - GM1026 (Invalid argument type)
+        - GM1027 (Type mismatch)
+        - GM1028 (Unknown identifier)
+        - GM1029 (Unknown type)
+        - GM1030 (Unknown function)
+        - GM1031 (Unknown variable)
+        - GM1032 (Unknown asset)
+        - GM1033 (Unknown macro)
+        - GM1034 (Unknown enum member)
+        - GM1035 (Unknown struct member)
+        # Type & Static Analysis Warnings (GM2000 Series)
+        - GM2000 (Unused variable)
+        - GM2001 (Unassigned variable)
+        - GM2002 (Implicit type conversion)
+        - GM2003 (Deprecated function/feature)
+        - GM2004 (Accessing uninitialized variable)
+        - GM2005 (Variable hides existing declaration)
+        - GM2006 (Function hides global variable)
+        - GM2007 (Redundant expression)
+        - GM2008 (Const variable reassigned)
+        - GM2009 (Incompatible types in operation)
+        - GM2010 (Array index out of bounds)
+        - GM2011 (Division by zero)
+        - GM2012 (Condition is always true/false)
+        - GM2013 (Infinite loop detected)
+        - GM2014 (Missing break in switch case)
+        - GM2015 (Unused function argument)
+        - GM2016 (Unused return value)
+        - GM2017 (Type coercion warning)
+        - GM2018 (Possible null/undefined reference)
+        - GM2019 (Asset index out of range)
+        - GM2020 (Invalid JSDoc tag)
+        - GM2021 (JSDoc parameter mismatch)
+        - GM2022 (JSDoc return type mismatch)
+        - GM2023 (Missing JSDoc parameter type)
+        - GM2024 (Global variable scope warning)
+        - GM2025 (Instantiating non-constructor struct)
+        - GM2026 (Accessing private/protected member)
+        - GM2027 (Method override signature mismatch)
+        - GM2028 (Static member accessed via instance)
+        - GM2029 (Instance member accessed via static context)
+        - GM2030 (Self-assignment warning)
+        - GM2031 (Naming convention mismatch)
+        - GM2032 (Code style guideline violation)
+        - GM2033 (Performance suggestion)
+        - GM2034 (Security suggestion)
+        - GM2035 (Other / Unlisted GM Code)
+    validations:
+      required: false
+
+# Severity
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How serious is the problem?
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+    validations:
+      required: true
+
+# Problem Summary
+
+  - type: textarea
+    id: problem-summary
+    attributes:
+      label: Problem Summary
+      description: Please describe the issue in a few sentences.
+      placeholder: A brief summary of the issue.
+    validations:
+      required: true
+
+# Expected Behaviour
+
+  - type: textarea
+    id: expected-behaviour
+    attributes:
+      label: Expected Behaviour
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+# Steps To Reproduce
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Please list the steps to reproduce the issue.
+      placeholder: "1. \n2. \n3."
+    validations:
+      required: true
+
+# Actual Behaviour
+
+  - type: textarea
+    id: actual-behaviour
+    attributes:
+      label: Actual Behaviour
+      description: What actually happened? 
+    validations:
+      required: true
+
+# Additional Information
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional Information
+      description: Provide any additional information or context that might help us resolve the issue.
+      placeholder: Additional context, error messages, or anything else that may be helpful.
+    validations:
+      required: false
+
+# Agree To Terms
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this bug report, you agree to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
+      options:
+        - label: I agree to follow this project's Code of conduct.

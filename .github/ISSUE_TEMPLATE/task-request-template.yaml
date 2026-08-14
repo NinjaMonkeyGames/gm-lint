@@ -1,0 +1,113 @@
+########################################################################################################################
+#                                                       TASK FORM                                                      #
+########################################################################################################################
+
+# 1. Meta Data
+# 2. Initialise form
+# 3. Introduction text
+# 4. Email input
+# 5. Task description
+# 6. Priority
+# 7. Acceptance criteria
+# 8. Dependencies
+# 9. Additional notes
+
+# Meta Data
+
+name: 📋 Task Request
+description: Request a task to be completed by the development team.
+title: "[Task]: "
+labels: ["task", "new"]
+projects: ["NinjaMonkeyGames/12"]
+
+# Initialise Form
+
+body:
+
+# Introduction Text
+
+  - type: markdown
+    attributes:
+      value: |
+        Task Overview
+        Please provide details about the task that needs to be completed.
+  
+  # Introduction Test
+
+  - type: input
+    id: task-title
+    attributes:
+      label: "Task Title"
+      description: "A short and clear title for the task."
+      placeholder: "E.g., Update documentation for new API endpoint"
+    validations:
+      required: true
+
+  # Email Input
+
+  - type: input
+    id: contact-email
+    attributes:
+      label: Contact Email
+      description: Please provide an email where we can reach you if more information is needed.
+      placeholder: email@example.com
+    validations:
+      required: true
+  
+  # Task Description
+
+  - type: textarea
+    id: task-description
+    attributes:
+      label: "Task Description"
+      description: "Provide a clear and concise description of what needs to be done."
+      placeholder: "Describe the task in detail, including any necessary context."
+    validations:
+      required: true
+  
+  # Priority
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      description: "Select the priority level for this task."
+      options:
+        - "Low"
+        - "Medium"
+        - "High"
+    validations:
+      required: true
+  
+  # Acceptance Criteria
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "Acceptance Criteria"
+      description: "List the conditions that must be met for this task to be considered complete."
+      placeholder: "E.g., Documentation updated in the wiki, reviewed by at least one team member."
+    validations:
+      required: true
+  
+  # Dependencies
+
+  - type: textarea
+    id: depends-on
+    attributes:
+      label: "Depends on"
+      description: "Other tasks this issue depends on in order to complete"
+      placeholder: "Depends on #"
+    validations:
+      required: false
+  
+  # Additional Notes
+
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: "Additional Notes"
+      description: "Include any other relevant details or links."
+      placeholder: "E.g., Links to related issues, resources, or discussions."
+    validations:
+      required: false

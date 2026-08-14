@@ -1,0 +1,161 @@
+########################################################################################################################
+#                                               FEATURE REQUEST TEMPLATE                                               #
+########################################################################################################################
+
+# 1.  Meta data.
+# 2.  Initialise form.
+# 3.  Introduction text.
+# 4.  Email input.
+# 5.  OS selection.
+# 6.  Browser selection.
+# 7.  Feature type.
+# 8.  Priority.
+# 9.  Feature summary.
+# 10. Expected behaviour.
+# 11. Use case.
+# 12. Additional information.
+# 13. Agree to terms.
+
+# Meta Data
+
+name: 🚀 Feature Request
+description: Submit a request for a new feature or improvement.
+title: "[Feature Request]: "
+labels: ["feature", "new"]
+projects: ["NinjaMonkeyGames/12"]
+
+# Initialise Form
+
+body:
+
+# Introduction Text
+
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please fill out the form below with as much detail as possible to help us understand and prioritize your request.
+
+# Email Input
+
+  - type: input
+    id: contact-email
+    attributes:
+      label: Contact Email
+      description: Please provide an email where we can reach you if we need more information.
+      placeholder: email@example.com
+    validations:
+      required: true
+
+# OS Selection
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: true
+
+# Browser Selection
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      description: What browser are you using?
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Microsoft Edge
+        - Opera
+        - Other
+    validations:
+      required: true
+
+# Feature Type
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: Select the type of feature you are requesting.
+      options:
+        - New Feature
+        - Improvement
+        - Enhancement
+    validations:
+      required: true
+
+# Priority
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature request?
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+    validations:
+      required: true
+
+# Feature Summary
+
+  - type: textarea
+    id: feature-summary
+    attributes:
+      label: Feature Summary
+      description: Please provide a brief summary of the feature you're requesting.
+      placeholder: A short description of the feature.
+    validations:
+      required: true
+
+# Expected Behaviour
+
+  - type: textarea
+    id: expected-behaviour
+    attributes:
+      label: Expected Behaviour
+      description: What should happen when this feature is implemented?
+    validations:
+      required: true
+
+# Use Case
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: How would this feature benefit you or your workflow?
+      placeholder: Describe the scenario in which this feature would be useful.
+    validations:
+      required: true
+
+# Additional Information
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional Information
+      description: Please provide any additional context, screenshots, or details that may help us understand your request better.
+      placeholder: Any extra details or resources that might help.
+    validations:
+      required: false
+
+# Agree To Terms
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this feature request, you agree to follow our [Code of Conduct](https://example.com).
+      options:
+        - label: I agree to follow this project's Code of Conduct.
