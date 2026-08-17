@@ -42,11 +42,10 @@ export default [
   // 2. Base configs
   eslint.configs.recommended,
   jsdoc.configs['flat/recommended'],
-  ...tseslint.configs.recommended,
 
-  // 3. JS/TS strict rules
+  // 3a. JS strict rules (NO TypeScript rules here)
   {
-    files: ['**/*.{ts,tsx,js,jsx}'],
+    files: ['**/*.{js,jsx}'],
 
     settings: {
       jsdoc: {
@@ -55,7 +54,7 @@ export default [
     },
 
     rules: {
-      // --- General JS/TS strictness ---
+      // --- General JS strictness ---
       'no-console': 'error',
       'eqeqeq': ['error', 'always'],
       'curly': ['error', 'all'],
@@ -69,13 +68,6 @@ export default [
       'quotes': ['error', 'single'],
       'brace-style': ['error', 'allman', { allowSingleLine: false }],
       'indent': ['error', INDENT_SPACES, { SwitchCase: SWITCH_CASE_INDENT }],
-
-      // --- TS strictness ---
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/explicit-function-return-type': 'error',
-      '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-non-null-assertion': 'error',
 
       // --- JSDoc strictness ---
       'jsdoc/require-jsdoc': ['error', {
@@ -99,6 +91,70 @@ export default [
           definedTags: ['remarks', 'example', 'defaultValue'],
         },
       ],
+    },
+  },
+
+  // 3b. Apply typescript-eslint recommended config ONLY to ts/tsx
+  ...tseslint.configs.recommended.map(cfg => ({
+    ...cfg,
+    files: ['**/*.{ts,tsx}'],
+  })),
+
+  // 3c. TS strict rules & JSDoc configuration
+  {
+    files: ['**/*.{ts,tsx}'],
+
+    settings: {
+      jsdoc: {
+        mode: 'typescript',
+      },
+    },
+
+    rules: {
+      // --- JSDoc strictness ---
+      'jsdoc/require-jsdoc': ['error', {
+        publicOnly: true,
+        require: {
+          FunctionDeclaration: true,
+          MethodDefinition: true,
+          ClassDeclaration: true,
+          ArrowFunctionExpression: true,
+          FunctionExpression: true,
+        },
+      }],
+      'jsdoc/require-param': 'error',
+      'jsdoc/require-param-description': 'error',
+      'jsdoc/require-returns': 'error',
+      'jsdoc/require-returns-description': 'error',
+      'jsdoc/check-alignment': 'error',
+      'jsdoc/check-tag-names': [
+        'error',
+        {
+          definedTags: ['remarks', 'example', 'defaultValue'],
+        },
+      ],
+
+      // --- TypeScript strictness ---
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/explicit-function-return-type': 'error',
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-non-null-assertion': 'error',
+
+      // --- General JS/TS strictness ---
+      'no-console': 'error',
+      'eqeqeq': ['error', 'always'],
+      'curly': ['error', 'all'],
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'no-magic-numbers': ['warn', { ignore: [0, 1, -1] }],
+      'complexity': ['warn', MAX_COMPLEXITY],
+      'max-lines': ['warn', { max: MAX_LINES, skipBlankLines: true, skipComments: true }],
+      'max-params': ['error', MAX_PARAMS],
+      'semi': ['error', 'always'],
+      'quotes': ['error', 'single'],
+      'brace-style': ['error', 'allman', { allowSingleLine: false }],
+      'indent': ['error', INDENT_SPACES, { SwitchCase: SWITCH_CASE_INDENT }],
     },
   },
 

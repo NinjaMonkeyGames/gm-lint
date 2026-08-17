@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "GM1000": {
+      "severity": "error"
+    }
+  }
+}

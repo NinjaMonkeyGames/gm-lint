@@ -1,4 +1,7 @@
 {
+  "bin": {
+    "gm-lint": "./bin/index.js"
+  },
   "dependencies": {
     "eslint-plugin-jsdoc": "^63.3.3"
   },
