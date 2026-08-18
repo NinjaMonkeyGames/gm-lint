@@ -47,7 +47,7 @@ jobs:
         run: npx commitlint --config .config/commitlint.config.js --last
 
       - name: ESLint
-        run: npx eslint . --config eslint.config.js
+        run: npx eslint . --config .config/eslint.config.js
 
   # ---------------------------------------------------------------------------
   # 2. PR & Merge Queue Checks
@@ -88,7 +88,7 @@ jobs:
         run: npx markdownlint-cli2 --config .config/.markdownlint-cli2.json "**/*.md"
 
       - name: ESLint
-        run: npx eslint . --config eslint.config.js
+        run: npx eslint . --config .config/eslint.config.js
 
       - name: Pack NPM Package (Dry-Run Verification)
         run: npm pack --dry-run
