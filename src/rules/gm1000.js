@@ -1,23 +1,67 @@
-/** @type {{ defaultSeverity: string, defaultEnabled: boolean }} */
+/**
+ * @file Rule GM1000: Ensures that the `break` keyword is only used within an enclosing loop or switch statement.
+ * @module rules/gm1000
+ */
+
+/**
+ * Metadata for the GM1000 rule.
+ * @type {{ defaultSeverity: string, defaultEnabled: boolean }}
+ */
 export const meta = {
   defaultSeverity: 'warning',
   defaultEnabled: true,
 };
 
+/** @type {number} 1-based line index offset. */
 const LINE_OFFSET = 1;
+
+/** @type {number} 1-based column index offset. */
 const COLUMN_OFFSET = 1;
+
+/** @type {number} Character length of `//` or `/*` markers. */
 const COMMENT_MARKER_LENGTH = 2;
+
+/** @type {number} Minimum stack depth containing the root global scope. */
 const MIN_STACK_DEPTH = 1;
 
+/** @type {Set<string>} GML keywords that define a valid loop or breakable context. */
 const LOOP_KEYWORDS = new Set(['for', 'while', 'repeat', 'with', 'do', 'switch']);
+
+/** @type {Set<string>} GML keywords that introduce control flow statements. */
 const CONTROL_KEYWORDS = new Set(['for', 'while', 'repeat', 'with', 'do', 'switch', 'if', 'else']);
+
+/** @type {RegExp} Regex matcher for GML tokens including numbers, identifiers, braces, parentheses, and semicolons. */
 const TOKEN_REGEX = /\b0x[0-9a-fA-F]+\b|\b\d+(\.\d+)?\b|\b[a-zA-Z_]\w*\b|[{}();]/g;
+
+/**
+ * Represents a single scope frame on the analyzer stack.
+ * @typedef {object} ScopeFrame
+ * @property {'braced' | 'single'} type - The structural type of the scope frame.
+ * @property {boolean} isLoop - Whether this scope sits inside a valid breakable loop or switch.
+ * @property {number} line - The starting line number of the scope.
+ */
+
+/**
+ * Represents the state of a pending control construct waiting for headers or bodies.
+ * @typedef {object} PendingControlState
+ * @property {boolean} isLoop - Whether the pending construct qualifies as a breakable loop/switch context.
+ * @property {'WAIT_HEADER' | 'IN_HEADER' | 'WAIT_BODY'} state - The parsing phase of the control construct.
+ * @property {number} [targetParenDepth] - Parenthesis depth target for matching header closing parens.
+ */
+
+/**
+ * Represents a detected diagnostic issue.
+ * @typedef {object} LintIssue
+ * @property {number} line - Line number of the issue.
+ * @property {number} column - Column offset of the issue.
+ * @property {string} message - Description of the rule violation.
+ */
 
 /**
  * Blanks out a `//` line comment starting at index i, stopping before any line break.
  * @param {string[]} chars - Mutable character array of the source.
  * @param {number} i - Index of the first '/' of the comment marker.
- * @param {number} n - Length of chars.
+ * @param {number} n - Length of chars array.
  * @returns {number} Index immediately after the blanked comment.
  */
 function skipLineComment(chars, i, n) 
@@ -36,7 +80,7 @@ function skipLineComment(chars, i, n)
  * Blanks out a `/* ... *\/` block comment starting at index i, preserving line breaks.
  * @param {string[]} chars - Mutable character array of the source.
  * @param {number} i - Index of the first '/' of the comment marker.
- * @param {number} n - Length of chars.
+ * @param {number} n - Length of chars array.
  * @returns {number} Index immediately after the blanked comment.
  */
 function skipBlockComment(chars, i, n) 
@@ -65,7 +109,7 @@ function skipBlockComment(chars, i, n)
  * Blanks out a verbatim string literal (`@"..."` or `@'...'`) starting at index i.
  * @param {string[]} chars - Mutable character array of the source.
  * @param {number} i - Index of the '@' marker.
- * @param {number} n - Length of chars.
+ * @param {number} n - Length of chars array.
  * @returns {number} Index immediately after the blanked string.
  */
 function skipVerbatimString(chars, i, n) 
@@ -94,7 +138,7 @@ function skipVerbatimString(chars, i, n)
  * Blanks out a regular quoted string literal starting at index i.
  * @param {string[]} chars - Mutable character array of the source.
  * @param {number} i - Index of the opening quote.
- * @param {number} n - Length of chars.
+ * @param {number} n - Length of chars array.
  * @returns {number} Index immediately after the blanked string.
  */
 function skipString(chars, i, n) 
@@ -128,9 +172,9 @@ function skipString(chars, i, n)
 }
 
 /**
- * Replaces comments and string literals with spaces while preserving line breaks.
+ * Replaces comments and string literals with spaces while preserving original code offsets and line breaks.
  * @param {string} code - Full GML script text.
- * @returns {string} Code with comments and strings scrubbed.
+ * @returns {string} Code with comments and string contents scrubbed out.
  */
 function sanitizeCode(code) 
 {
@@ -147,11 +191,13 @@ function sanitizeCode(code)
     {
       if (next === '/') 
       {
-        i = skipLineComment(chars, i, n); continue; 
+        i = skipLineComment(chars, i, n); 
+        continue; 
       }
       if (next === '*') 
       {
-        i = skipBlockComment(chars, i, n); continue; 
+        i = skipBlockComment(chars, i, n); 
+        continue; 
       }
     }
     else if (curr === '@' && (next === '"' || next === '\'')) 
@@ -170,21 +216,21 @@ function sanitizeCode(code)
 }
 
 /**
- * Pops single-statement scopes from the stack.
- * @param {Array<{ type: 'braced' | 'single', isLoop: boolean, line: number }>} stack - Scope stack.
+ * Pops a single single-statement scope frame from the stack if present.
+ * @param {ScopeFrame[]} stack - Scope stack array.
  * @returns {void}
  */
-function popSingleScopes(stack) 
+function popSingleScope(stack) 
 {
-  while (stack.length > MIN_STACK_DEPTH && stack[stack.length - 1].type === 'single') 
+  if (stack.length > MIN_STACK_DEPTH && stack[stack.length - 1].type === 'single') 
   {
     stack.pop();
   }
 }
 
 /**
- * Updates parenthesis tracking depth.
- * @param {string} val - Token text value.
+ * Updates parenthesis tracking depth based on token value.
+ * @param {string} val - Token string value.
  * @param {number} depth - Current parenthesis depth.
  * @returns {number} Updated parenthesis depth.
  */
@@ -202,12 +248,12 @@ function updateParenDepth(val, depth)
 }
 
 /**
- * Updates pending control state based on current header or body progress.
- * @param {{ isLoop: boolean, state: string, targetParenDepth?: number } | null} pendingControl - Active control state object.
- * @param {{ value: string, line: number, column: number }} token - Current token.
+ * Updates pending control state based on token progress across statement headers or bodies.
+ * @param {PendingControlState | null} pendingControl - Active control state context.
+ * @param {{ value: string, line: number, column: number }} token - Current matched token object.
  * @param {number} parenDepth - Current parenthesis depth.
- * @param {Array<{ type: 'braced' | 'single', isLoop: boolean, line: number }>} stack - Scope stack.
- * @returns {{ pendingControl: { isLoop: boolean, state: string, targetParenDepth?: number } | null, consumedAsBlock: boolean }} Updated state and block match status.
+ * @param {ScopeFrame[]} stack - Scope stack array.
+ * @returns {{ pendingControl: PendingControlState | null, consumedAsBlock: boolean }} Updated control state and block match indicator.
  */
 function processPendingControl(pendingControl, token, parenDepth, stack) 
 {
@@ -250,8 +296,8 @@ function processPendingControl(pendingControl, token, parenDepth, stack)
 }
 
 /**
- * Pops the stack up through the nearest enclosing braced scope.
- * @param {Array<{ type: 'braced' | 'single', isLoop: boolean, line: number }>} stack - Scope stack.
+ * Pops the stack up through the nearest enclosing braced scope, removing any trailing single statement scope.
+ * @param {ScopeFrame[]} stack - Scope stack array.
  * @returns {void}
  */
 function closeBraceScope(stack) 
@@ -263,14 +309,14 @@ function closeBraceScope(stack)
       break;
     }
   }
-  popSingleScopes(stack);
+  popSingleScope(stack);
 }
 
 /**
- * Derives the pendingControl state to enter after seeing a control-flow keyword.
- * @param {string} tokenValue - The keyword's text value.
- * @param {{ isLoop: boolean }} currentScope - Innermost scope on the stack.
- * @returns {{ isLoop: boolean, state: string }} Initial pendingControl state.
+ * Derives the initial pendingControl state upon encountering a control-flow keyword.
+ * @param {string} tokenValue - The control-flow keyword text value.
+ * @param {ScopeFrame} currentScope - The innermost scope currently on top of the stack.
+ * @returns {PendingControlState} Initial state configuration for pending control evaluation.
  */
 function controlKeywordState(tokenValue, currentScope) 
 {
@@ -280,12 +326,12 @@ function controlKeywordState(tokenValue, currentScope)
 }
 
 /**
- * Evaluates structural and keyword tokens against scope and issues state.
- * @param {{ value: string, line: number, column: number }} token - Current token.
- * @param {Array<{ type: 'braced' | 'single', isLoop: boolean, line: number }>} stack - Scope stack.
+ * Evaluates structural and keyword tokens against current scope state and pushes rule violations.
+ * @param {{ value: string, line: number, column: number }} token - Current matched token object.
+ * @param {ScopeFrame[]} stack - Scope stack array.
  * @param {number} parenDepth - Current parenthesis depth.
- * @param {Array<{ line: number, column: number, message: string }>} issues - Issues collection array.
- * @returns {{ isLoop: boolean, state: string } | null} Next pendingControl state or null.
+ * @param {LintIssue[]} issues - Collection array for reported linting issues.
+ * @returns {PendingControlState | null} Next pendingControl state, or null if no new state entered.
  */
 function evaluateToken(token, stack, parenDepth, issues) 
 {
@@ -305,7 +351,7 @@ function evaluateToken(token, stack, parenDepth, issues)
   {
     if (parenDepth === 0) 
     {
-      popSingleScopes(stack);
+      popSingleScope(stack);
     }
     return null;
   }
@@ -329,12 +375,12 @@ function evaluateToken(token, stack, parenDepth, issues)
 }
 
 /**
- * Determines whether leftover single-statement scopes should be popped at line start.
- * @param {Array<{ type: 'braced' | 'single', isLoop: boolean, line: number }>} stack - Scope stack.
- * @param {{ state: string } | null} pendingControl - Active control state object.
+ * Determines whether unbraced single-statement scopes should be popped at the start of a line.
+ * @param {ScopeFrame[]} stack - Scope stack array.
+ * @param {PendingControlState | null} pendingControl - Active pending control state object.
  * @param {number} parenDepth - Current parenthesis depth.
- * @param {number} currentLineNumber - 1-based line number about to be processed.
- * @returns {boolean} True if single-statement scopes should be popped now.
+ * @param {number} currentLineNumber - 1-based line number being processed.
+ * @returns {boolean} `true` if a single-statement scope needs to be popped.
  */
 function shouldPopAtLineStart(stack, pendingControl, parenDepth, currentLineNumber) 
 {
@@ -347,11 +393,11 @@ function shouldPopAtLineStart(stack, pendingControl, parenDepth, currentLineNumb
 }
 
 /**
- * Tokenizes a single sanitized line and updates the scan state in place.
- * @param {string} lineText - Sanitized text of the current line.
+ * Tokenizes a single sanitized code line and updates state in place.
+ * @param {string} lineText - Sanitized content of the current line.
  * @param {number} currentLineNumber - 1-based line number of lineText.
- * @param {{ stack: Array<{ type: 'braced' | 'single', isLoop: boolean, line: number }>, pendingControl: { isLoop: boolean, state: string, targetParenDepth?: number } | null, parenDepth: number }} state - Scan state.
- * @param {Array<{ line: number, column: number, message: string }>} issues - Issues array.
+ * @param {{ stack: ScopeFrame[], pendingControl: PendingControlState | null, parenDepth: number }} state - Scanning state tracking object.
+ * @param {LintIssue[]} issues - Collection array for reported linting issues.
  * @returns {void}
  */
 function processLineTokens(lineText, currentLineNumber, state, issues) 
@@ -378,18 +424,19 @@ function processLineTokens(lineText, currentLineNumber, state, issues)
 }
 
 /**
- * Checks for 'break' statements used outside of an enclosing loop or switch construct.
- * @param {string} content - Full GML script text.
- * @param {string[]} lines - GML script split by line breaks.
- * @returns {Array<{line: number, column: number, message: string}>} Array of detected GM1000 issues.
+ * Checks GML code for invalid usage of the `break` keyword outside enclosing loops or switches.
+ * @param {string} content - Full GML script content string.
+ * @param {string[]} lines - Array of script content split by newline boundaries.
+ * @returns {LintIssue[]} Array of detected GM1000 diagnostic issues.
  */
 export default function checkGM1000(content, lines) 
 {
+  /** @type {LintIssue[]} */
   const issues = [];
   const sanitized = sanitizeCode(content || lines.join('\n'));
   const sanitizedLines = sanitized.split(/\r?\n/);
 
-  /** @type {{ stack: Array<{ type: 'braced' | 'single', isLoop: boolean, line: number }>, pendingControl: { isLoop: boolean, state: string, targetParenDepth?: number } | null, parenDepth: number }} */
+  /** @type {{ stack: ScopeFrame[], pendingControl: PendingControlState | null, parenDepth: number }} */
   const state = {
     stack: [{ type: 'braced', isLoop: false, line: 0 }],
     pendingControl: null,
@@ -401,7 +448,7 @@ export default function checkGM1000(content, lines)
     const currentLineNumber = lineIndex + LINE_OFFSET;
     if (shouldPopAtLineStart(state.stack, state.pendingControl, state.parenDepth, currentLineNumber)) 
     {
-      popSingleScopes(state.stack);
+      popSingleScope(state.stack);
     }
     processLineTokens(sanitizedLines[lineIndex], currentLineNumber, state, issues);
   }
