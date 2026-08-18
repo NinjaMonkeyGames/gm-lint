@@ -68,7 +68,7 @@ export function findConfigFile(searchDir)
 /**
  * Loads and dynamically imports rule modules from src/rules.
  * @param {string} rulesDirectory - Path to the rules directory.
- * @returns {Promise<Map<string, {run: Function, meta: object}>>} Map of rule IDs to handlers and metadata.
+ * @returns {Promise<Map<string, {run: (content: string, lines: string[]) => Array<{line: number, column: number, message: string}>, meta: object}>>} Map of rule IDs to handlers and metadata.
  */
 export async function loadRules(rulesDirectory)
 {
@@ -131,6 +131,81 @@ function getRuleConfig(rulesConfig, ruleId)
 }
 
 /**
+ * Resolves the absolute path to the configuration file.
+ * @param {string} rootDir - Project root directory.
+ * @param {string|null} customConfigPath - Custom path provided via options.
+ * @returns {string|null} Resolved config file path or null.
+ */
+function resolveConfigPath(rootDir, customConfigPath)
+{
+  const resolved = customConfigPath ? path.resolve(rootDir, customConfigPath) : null;
+  if (resolved && fs.existsSync(resolved))
+  {
+    return resolved;
+  }
+  return findConfigFile(rootDir);
+}
+
+/**
+ * Loads and parses JSON config from file path.
+ * @param {string|null} configPath - Absolute path to config file.
+ * @returns {object} Loaded configuration object.
+ */
+function loadConfig(configPath)
+{
+  if (configPath && fs.existsSync(configPath))
+  {
+    const configRaw = fs.readFileSync(configPath, 'utf8');
+    return JSON.parse(configRaw);
+  }
+  return { rules: {} };
+}
+
+/**
+ * Evaluates rules against a single target file.
+ * @param {string} filePath - Path of the file to lint.
+ * @param {Map} loadedRules - Loaded lint rules map.
+ * @param {object} rulesConfig - Active configuration rules map.
+ * @returns {boolean} True if issues were found.
+ */
+function processFile(filePath, loadedRules, rulesConfig)
+{
+  const content = fs.readFileSync(filePath, 'utf8');
+  if (content.includes(IGNORE_TAG))
+  {
+    return false;
+  }
+
+  const lines = content.split(/\r?\n/);
+  let fileHasErrors = false;
+
+  for (const [ruleId, ruleObj] of loadedRules.entries())
+  {
+    const ruleConfig = getRuleConfig(rulesConfig, ruleId);
+    const defaultSeverity = ruleObj.meta.defaultSeverity || DEFAULT_FALLBACK_SEVERITY;
+    const defaultEnabled = ruleObj.meta.defaultEnabled !== false;
+    const isEnabled = ruleConfig.enabled !== undefined ? ruleConfig.enabled : defaultEnabled;
+
+    if (!isEnabled)
+    {
+      continue;
+    }
+
+    const severity = ruleConfig.severity || defaultSeverity;
+    const issues = ruleObj.run(content, lines);
+
+    for (const issue of issues)
+    {
+      fileHasErrors = true;
+      const msg = `${filePath}:${issue.line}:${issue.column} - [${severity}] ${issue.message} (${ruleId})\n`;
+      process.stdout.write(msg);
+    }
+  }
+
+  return fileHasErrors;
+}
+
+/**
  * Runs the GML linter over the target project files.
  * @param {string|null} customConfigPath - Path provided by --config, if present.
  * @returns {Promise<boolean>} True if linting completed with no errors, false otherwise.
@@ -138,60 +213,20 @@ function getRuleConfig(rulesConfig, ruleId)
 export async function runEngine(customConfigPath)
 {
   const rootDir = process.cwd();
-  let resolvedConfigPath = customConfigPath ? path.resolve(rootDir, customConfigPath) : null;
-
-  if (!resolvedConfigPath || !fs.existsSync(resolvedConfigPath))
-  {
-    resolvedConfigPath = findConfigFile(rootDir);
-  }
-
-  let config = { rules: {} };
-
-  if (resolvedConfigPath && fs.existsSync(resolvedConfigPath))
-  {
-    const configRaw = fs.readFileSync(resolvedConfigPath, 'utf8');
-    config = JSON.parse(configRaw);
-  }
+  const resolvedConfigPath = resolveConfigPath(rootDir, customConfigPath);
+  const config = loadConfig(resolvedConfigPath);
 
   const rulesPath = path.join(import.meta.dirname, RULE_DIR_NAME);
   const loadedRules = await loadRules(rulesPath);
   const gmlFiles = findGmlFiles(rootDir);
+
   let hasErrors = false;
 
   for (const filePath of gmlFiles)
   {
-    const content = fs.readFileSync(filePath, 'utf8');
-
-    if (content.includes(IGNORE_TAG))
+    if (processFile(filePath, loadedRules, config.rules))
     {
-      continue;
-    }
-
-    const lines = content.split(/\r?\n/);
-
-    for (const [ruleId, ruleObj] of loadedRules.entries())
-    {
-      const ruleConfig = getRuleConfig(config.rules, ruleId);
-
-      const defaultSeverity = ruleObj.meta.defaultSeverity || DEFAULT_FALLBACK_SEVERITY;
-      const defaultEnabled = ruleObj.meta.defaultEnabled !== false;
-
-      const isEnabled = ruleConfig.enabled !== undefined ? ruleConfig.enabled : defaultEnabled;
-
-      if (!isEnabled)
-      {
-        continue;
-      }
-
-      const severity = ruleConfig.severity || defaultSeverity;
-      const issues = ruleObj.run(content, lines);
-
-      for (const issue of issues)
-      {
-        hasErrors = true;
-        const msg = `${filePath}:${issue.line}:${issue.column} - [${severity}] ${issue.message} (${ruleId})\n`;
-        process.stdout.write(msg);
-      }
+      hasErrors = true;
     }
   }
 
