@@ -1,3 +1,4 @@
+/* eslint-disable jsonc/no-comments */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                    IDE SETTINGS                                                    //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -14,6 +15,16 @@
 // 9. Set commitlint config path.
 // 10. Markdown settings.
 {
+  // Markdown Settings
+
+  "[markdown]": 
+  {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+    "editor.formatOnSave": true
+  },
+  // Set commitlint config path
+
+  "commitlint.config.file": ".config/commitlint.config.js",
   // Automatic Actions
 
   "editor.formatOnSave": true, // Automatically format files when saving
@@ -33,6 +44,11 @@
 
   "editor.wrappingIndent": "same", // Keep indentation level of wrapped lines
 
+
+  "eslint.options": {
+    "overrideConfigFile": ".config/eslint.config.js"
+  },
+  "eslint.useFlatConfig": true,
   // Confirmation Settings
 
   "explorer.confirmDelete": false, // Prevents prompt when deleting files
@@ -49,6 +65,13 @@
     "**/node_modules": false // Show node_modules
   },
 
+  // Automatically format JSON files on save
+
+  "json.format.enable": false,
+
+  "markdown.extension.toc.updateOnSave": true, // Automatically update the TOC when saving markdown files
+  "markdownlint.configFile": ".config/.markdownlint-cli2.jsonc", // Set markdownlint config path
+
   // Include Otherwise Excluded Files In Project File Search
 
   "search.exclude": 
@@ -59,26 +82,7 @@
 
   // Start Terminal in Bash
 
-  "terminal.integrated.defaultProfile.linux": "bash",
-
-  // Automatically format JSON files on save
-
-  "json.format.enable": false,
-
-  // Set commitlint config path
-
-  "commitlint.config.file": ".config/commitlint.config.js",
-  
-  // Markdown Settings
-
-  "[markdown]": 
-  {
-    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
-    "editor.formatOnSave": true
-  },
-
-  "markdown.extension.toc.updateOnSave": true, // Automatically update the TOC when saving markdown files
-  "markdownlint.configFile": ".config/.markdownlint-cli2.jsonc", // Set markdownlint config path
+  "terminal.integrated.defaultProfile.linux": "bash"
 }
 
 

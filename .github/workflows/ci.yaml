@@ -111,7 +111,7 @@ jobs:
         id: nmg_bot_token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.APP_ID }}
+          client-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Checkout Code
@@ -134,7 +134,7 @@ jobs:
         run: npx markdownlint-cli2 --config .config/.markdownlint-cli2.json "**/*.md"
 
       - name: ESLint
-        run: npx eslint . --config eslint.config.js
+        run: npx eslint . --config .config/eslint.config.js
 
       - name: Publish Staged Package to NPM
         env:
@@ -172,7 +172,7 @@ jobs:
         run: npx markdownlint-cli2 --config .config/.markdownlint-cli2.json "**/*.md"
 
       - name: ESLint
-        run: npx eslint . --config eslint.config.js
+        run: npx eslint . --config .config/eslint.config.js
 
       - name: Semantic Release (Live Publish to NPM)
         env:

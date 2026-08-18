@@ -31,6 +31,8 @@ export default [
   {
     ignores: [
       '**/node_modules/',
+      '.markdownlint-cli2.jsonc',
+      'settings.json',
       '**/dist/',
       '**/build/',
       '**/coverage/',
