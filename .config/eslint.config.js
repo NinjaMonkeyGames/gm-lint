@@ -160,7 +160,7 @@ export default [
     },
   },
 
-  // 4. JSON/JSONC strict rules
+  // 4a. Shared JSON & JSONC parsing/formatting rules
   {
     files: ['**/*.json', '**/*.jsonc'],
     plugins: {
@@ -188,7 +188,6 @@ export default [
       'jsonc/no-octal-escape': 'error',
       'jsonc/no-bigint-literals': 'error',
       'jsonc/no-numeric-separators': 'error',
-      'jsonc/no-comments': 'error',
 
       // Validate against schemas (example: package.json)
       'json-schema-validator/no-invalid': ['error', {
@@ -199,6 +198,22 @@ export default [
           }
         ]
       }]
+    },
+  },
+
+  // 4b. Strict JSON only (Disallow comments)
+  {
+    files: ['**/*.json'],
+    rules: {
+      'jsonc/no-comments': 'error',
+    },
+  },
+
+  // 4c. JSONC only (Allow comments)
+  {
+    files: ['**/*.jsonc'],
+    rules: {
+      'jsonc/no-comments': 'off',
     },
   },
 ];

@@ -22,10 +22,6 @@
     "editor.defaultFormatter": "yzhang.markdown-all-in-one",
     "editor.formatOnSave": true
   },
-  // Set commitlint config path
-
-  "commitlint.config.file": ".config/commitlint.config.js",
-  // Automatic Actions
 
   "editor.formatOnSave": true, // Automatically format files when saving
   "editor.formatOnType": true, // Automatically format code as you type
@@ -48,7 +44,9 @@
   "eslint.options": {
     "overrideConfigFile": ".config/eslint.config.js"
   },
-  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [
+    { "changeProcessCWD": true, "directory": "./" }
+  ],
   // Confirmation Settings
 
   "explorer.confirmDelete": false, // Prevents prompt when deleting files
