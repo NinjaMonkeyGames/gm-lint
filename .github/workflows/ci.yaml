@@ -1,0 +1,181 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - 'release/**'
+      - 'master'
+  pull_request:
+    branches:
+      - 'develop'
+      - 'release/**'
+      - 'master'
+    types: [opened, synchronize, reopened, edited]
+  merge_group:
+    branches:
+      - 'develop'
+      - 'release/**'
+      - 'master'
+    types: [checks_requested]
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. Preview Checks (Pushes to feature/**)
+  # ---------------------------------------------------------------------------
+  preview-checks:
+    name: Preview - Lint Checks
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')
+    runs-on: ubuntu-latest
+    environment: preview
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Commitlint (Latest Branch Commit)
+        run: npx commitlint --config .config/commitlint.config.js --last
+
+      - name: ESLint
+        run: npx eslint . --config eslint.config.js
+
+  # ---------------------------------------------------------------------------
+  # 2. PR & Merge Queue Checks
+  # ---------------------------------------------------------------------------
+  pr-checks:
+    name: Checks & Verifications
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Commitlint (Web UI PR Title & Body)
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf "%s\n\n%s" "$PR_TITLE" "$PR_BODY" > /tmp/PR_COMMIT_MSG
+          npx commitlint --config .config/commitlint.config.js --edit /tmp/PR_COMMIT_MSG
+
+      - name: Commitlint (Merge Queue Commit)
+        if: github.event_name == 'merge_group'
+        run: npx commitlint --config .config/commitlint.config.js --last
+
+      - name: Markdownlint
+        run: npx markdownlint-cli2 --config .config/.markdownlint-cli2.json "**/*.md"
+
+      - name: ESLint
+        run: npx eslint . --config eslint.config.js
+
+      - name: Pack NPM Package (Dry-Run Verification)
+        run: npm pack --dry-run
+
+  # ---------------------------------------------------------------------------
+  # 3. Staging Release (Pushes to release/**)
+  # ---------------------------------------------------------------------------
+  staging-release:
+    name: Staging - Release Candidate & Publish
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Generate nmg-bot Token
+        id: nmg_bot_token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.nmg_bot_token.outputs.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Markdownlint
+        run: npx markdownlint-cli2 --config .config/.markdownlint-cli2.json "**/*.md"
+
+      - name: ESLint
+        run: npx eslint . --config eslint.config.js
+
+      - name: Publish Staged Package to NPM
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --tag staging
+
+  # ---------------------------------------------------------------------------
+  # 4. Production Release (Runs AFTER Merge directly on master)
+  # ---------------------------------------------------------------------------
+  production-release:
+    name: Production - Verification & Live NPM Publish
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Markdownlint
+        run: npx markdownlint-cli2 --config .config/.markdownlint-cli2.json "**/*.md"
+
+      - name: ESLint
+        run: npx eslint . --config eslint.config.js
+
+      - name: Semantic Release (Live Publish to NPM)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
