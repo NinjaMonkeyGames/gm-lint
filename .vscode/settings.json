@@ -23,6 +23,10 @@
     "editor.formatOnSave": true
   },
 
+  // Set commitlint config path
+
+  "commitlint.config.file": ".config/commitlint.config.js",
+
   "editor.formatOnSave": true, // Automatically format files when saving
   "editor.formatOnType": true, // Automatically format code as you type
 
@@ -51,6 +55,7 @@
 
   "explorer.confirmDelete": false, // Prevents prompt when deleting files
   "explorer.confirmDragAndDrop": false, // Prevents prompt when moving files
+  "explorer.excludeGitIgnore": false, // Prevent VS Code from hiding gitignored files/folders
   "files.autoSave": "afterDelay", // All file changes will be saved periodically
   "files.autoSaveDelay": 1000, // Set autosave delay for 1000 milliseconds
   "files.eol": "\n", // Force all new files to be in LF format opposed to CRLF
@@ -82,5 +87,3 @@
 
   "terminal.integrated.defaultProfile.linux": "bash"
 }
-
-
