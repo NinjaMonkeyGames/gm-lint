@@ -1,3 +1,5 @@
+// TRIGGERS EXPECTED [1]
+
 // Trigger
 
 var _items = get_items();
