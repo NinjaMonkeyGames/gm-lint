@@ -1,4 +1,4 @@
-// TRIGGERS EXPECTED [1]
+// TRIGGERS EXPECTED [2]
 
 // Trigger
 
@@ -20,3 +20,12 @@ while (true)
     var _debugMsg = "Processing block: }"; // Contains a closing brace inside a string
     break; // Valid break, but will trigger a false positive!
 }
+
+// Trigger
+
+while (is_active)
+    break; // Valid break inside a brace-less while loop
+
+// --- Later in the same file ---
+
+break; // INVALID! There is no enclosing loop here, but the linter will miss it!
