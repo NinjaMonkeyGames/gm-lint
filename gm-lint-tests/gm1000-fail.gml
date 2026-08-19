@@ -1,4 +1,4 @@
-// TRIGGERS EXPECTED [2]
+// TRIGGERS EXPECTED [3]
 
 // Trigger
 
@@ -29,3 +29,11 @@ while (is_active)
 // --- Later in the same file ---
 
 break; // INVALID! There is no enclosing loop here, but the linter will miss it!
+
+// Trigger
+
+repeat (5)
+    while (true)
+        i++;
+
+break; // False Negative: This illegal break is not caught.

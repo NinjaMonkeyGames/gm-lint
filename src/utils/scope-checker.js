@@ -13,6 +13,7 @@ function cleanCodeLine(lineText)
   let cleaned = lineText.replace(/\/\*.*?\*\//g, ' ');
   cleaned = cleaned.split('//')[0];
   cleaned = cleaned.replace(/"([^"\\]|\\.)*"/g, '""');
+  // eslint-disable-next-line quotes
   cleaned = cleaned.replace(/'([^'\\]|\\.)*'/g, "''");
   return cleaned;
 }
@@ -28,8 +29,7 @@ function cleanCodeLine(lineText)
 export function checkLoopOrSwitchStatements(lines, targetKeyword, errorMessage, allowSwitch = false)
 {
   const issues = [];
-  let scopeDepth = 0;
-  let pendingSingleStatement = false;
+  const scopeStack = [];
 
   lines.forEach((lineText, index) =>
   {
@@ -42,7 +42,6 @@ export function checkLoopOrSwitchStatements(lines, targetKeyword, errorMessage, 
       return;
     }
 
-    // Check target keyword on this line while the current scope is still valid
     const targetRegex = new RegExp(`^\\b${targetKeyword}\\b`);
     const hasTarget = targetRegex.test(trimmed);
 
@@ -50,53 +49,70 @@ export function checkLoopOrSwitchStatements(lines, targetKeyword, errorMessage, 
       ? /\b(for|while|repeat|with|do|switch)\b/ 
       : /\b(for|while|repeat|with|do)\b/;
 
-    let openedLoopOrSwitch = false;
-    if (regex.test(trimmed))
-    {
-      scopeDepth++;
-      openedLoopOrSwitch = true;
-    }
-
+    const hasKeyword = regex.test(trimmed);
     const hasOpeningBrace = cleaned.includes('{');
     const hasClosingBrace = cleaned.includes('}');
 
-    if (openedLoopOrSwitch && !hasOpeningBrace)
+    // Push a new scope onto the stack when a loop/switch keyword is encountered
+    if (hasKeyword)
     {
-      pendingSingleStatement = true;
+      scopeStack.push({
+        braced: hasOpeningBrace,
+        singleRemaining: !hasOpeningBrace
+      });
     }
 
-    // Adjust scope depth based on explicit braces
-    for (const char of cleaned)
-    {
-      if (char === '{')
-      {
-        pendingSingleStatement = false;
-      }
-      else if (char === '}')
-      {
-        if (scopeDepth > 0)
-        {
-          scopeDepth--;
-        }
-      }
-    }
-
-    // Evaluate target keyword validity under the current scope depth
+    // Evaluate target keyword validity under the current scope stack
     if (hasTarget)
     {
-      if (scopeDepth === 0)
+      if (scopeStack.length === 0)
       {
         issues.push({ line: lineNumber, message: errorMessage });
       }
     }
 
-    // Close pending single-statement scope after evaluating the line
-    if (pendingSingleStatement && !hasOpeningBrace && !hasClosingBrace && (trimmed.endsWith(';') || trimmed === targetKeyword))
+    // Adjust scope tracking based on explicit braces
+    for (const char of cleaned)
     {
-      pendingSingleStatement = false;
-      if (scopeDepth > 0)
+      if (char === '{')
       {
-        scopeDepth--;
+        if (scopeStack.length > 0)
+        {
+          const top = scopeStack[scopeStack.length - 1];
+          if (top.singleRemaining)
+          {
+            top.braced = true;
+            top.singleRemaining = false;
+          }
+        }
+      }
+      else if (char === '}')
+      {
+        while (scopeStack.length > 0)
+        {
+          const popped = scopeStack.pop();
+          if (popped.braced)
+          {
+            break;
+          }
+        }
+      }
+    }
+
+    // When a statement terminates (e.g., ends with ';'), pop all consecutive pending single-statement scopes
+    if (!hasOpeningBrace && !hasClosingBrace && (trimmed.endsWith(';') || trimmed === targetKeyword || /^[a-zA-Z0-9_]+\+\+;|--;|[a-zA-Z0-9_]+\s*=.+;/.test(trimmed)))
+    {
+      while (scopeStack.length > 0)
+      {
+        const top = scopeStack[scopeStack.length - 1];
+        if (top.singleRemaining)
+        {
+          scopeStack.pop();
+        }
+        else
+        {
+          break;
+        }
       }
     }
   });
