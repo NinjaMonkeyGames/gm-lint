@@ -1,0 +1,1 @@
+globalvar gameManager = new GameManager(); // GM1002 - globalvar does not support inline initializers.
