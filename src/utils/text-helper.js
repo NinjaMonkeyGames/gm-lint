@@ -13,11 +13,17 @@ export function isPureComment(trimmedLine)
 }
 
 /**
- * Strips trailing single-line comments from a line of code.
+ * Strips comments from a line of code, including trailing single-line
+ * comments ("// ...") and any inline block comments ("/* ... *\/")
+ * that appear before, after, or in the middle of the code on the line.
+ * Block comments are removed first so that a "//" occurring inside one
+ * doesn't get mistaken for the start of a line comment, and so that an
+ * "=" or ";" inside a block comment can never be mistaken for real code.
  * @param {string} lineText - The raw line text.
  * @returns {string} The code segment with comments removed.
  */
 export function stripInlineComment(lineText)
 {
-  return lineText.split('//')[0].trim();
+  const withoutBlockComments = lineText.replace(/\/\*.*?\*\//g, ' ');
+  return withoutBlockComments.split('//')[0].trim();
 }
