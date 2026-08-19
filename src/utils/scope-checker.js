@@ -3,6 +3,27 @@
  */
 
 /**
+ * Cleans a line of code by neutralizing string literals and comments
+ * to prevent false positives/negatives from braces or keywords inside text data.
+ * @param {string} lineText - The raw line text.
+ * @returns {string} The cleaned line text.
+ */
+function cleanCodeLine(lineText)
+{
+  // 1. Remove block comments
+  let cleaned = lineText.replace(/\/\*.*?\*\//g, ' ');
+  
+  // 2. Remove trailing single-line comments
+  cleaned = cleaned.split('//')[0];
+  
+  // 3. Strip double-quoted and single-quoted string contents
+  cleaned = cleaned.replace(/"([^"\\]|\\.)*"/g, '""');
+  cleaned = cleaned.replace(/'([^'\\]|\\.)*'/g, '\'\'');
+  
+  return cleaned;
+}
+
+/**
  * Validates whether control keywords (break/continue) are correctly scoped inside loops or switches.
  * @param {string[]} lines - Array of text lines from the GML file.
  * @param {string} targetKeyword - The keyword being evaluated (e.g., 'break', 'continue').
@@ -18,9 +39,10 @@ export function checkLoopOrSwitchStatements(lines, targetKeyword, errorMessage, 
   lines.forEach((lineText, index) =>
   {
     const lineNumber = index + 1;
-    const trimmed = lineText.trim();
+    const cleaned = cleanCodeLine(lineText);
+    const trimmed = cleaned.trim();
 
-    if (trimmed.startsWith('//') || trimmed.startsWith('/*'))
+    if (!trimmed)
     {
       return;
     }
@@ -34,7 +56,7 @@ export function checkLoopOrSwitchStatements(lines, targetKeyword, errorMessage, 
       loopSwitchDepth++;
     }
 
-    for (const char of trimmed)
+    for (const char of cleaned)
     {
       if (char === '}')
       {

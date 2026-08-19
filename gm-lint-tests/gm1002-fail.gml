@@ -1,3 +1,5 @@
+// TRIGGERS EXPECTED [1]
+
 // No trigger
 
 globalvar minScore; minScore = (score >= 10) ? 10 : score;
@@ -9,3 +11,6 @@ globalvar gameManager = new GameManager(); // GM1002 - globalvar does not suppor
 // No trigger
 
 globalvar highScore /* default = 0, set by save system */;
+
+// 
+

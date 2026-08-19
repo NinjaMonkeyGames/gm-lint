@@ -10,7 +10,10 @@ export default {
     {
       const lineNumber = index + 1;
       const trimmed = lineText.trim();
-      if (isPureComment(trimmed)) return;
+      if (isPureComment(trimmed)) 
+      {
+        return;
+      }
       if (/^globalvar\b/.test(trimmed))
       {
         const codePart = stripInlineComment(trimmed);
