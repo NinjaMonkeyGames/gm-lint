@@ -38,5 +38,5 @@ repeat (5)
 
 break; // False Negative: This illegal break is not caught.
 
-//
+// gm-lint bug proof: Multi-line block comment false positive
 
