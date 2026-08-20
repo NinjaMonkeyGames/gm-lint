@@ -293,7 +293,7 @@ class Parser {
     this.expect('Punctuator', '(', 'for loop');
     let init = null;
     if (!this.atPunct(';')) {
-      init = this.atKeyword(['var', 'static']) ? this.parseVarDeclaration() : this.parseExpressionStatement();
+      init = this.atKeyword(['var', 'static', 'globalvar']) ? this.parseVarDeclaration() : this.parseExpressionStatement();
     } else {
       this.next();
     }

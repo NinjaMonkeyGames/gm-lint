@@ -1,11 +1,6 @@
-var _items = get_items();
-var i = 0;
-repeat (array_length(_items))
-{
-    var _item = _items[i++];
-    if (_item == undefined)
-        continue; // Good!
-    // ... Some logic here ...
+for (let i = ancestors.length - 1; i >= 0; i--) {
+  const anc = ancestors[i];
+  // A break can't reach past a function boundary to an outer loop.
+  if (isFunctionLike(anc)) break;
+  if (BREAK_TARGETS.has(anc.type)) return; // valid
 }
-continue; // GM1001 - No loop to continue from.
-
