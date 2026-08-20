@@ -8,6 +8,7 @@ import jsdoc from 'eslint-plugin-jsdoc';
 import jsoncPlugin from 'eslint-plugin-jsonc';
 import * as jsoncParser from 'jsonc-eslint-parser';
 import jsonSchemaValidator from 'eslint-plugin-json-schema-validator';
+import globals from 'globals'; // <-- 1. Import globals package
 
 // --- Constants for rule configuration ---
 const MAX_COMPLEXITY = 10;
@@ -48,6 +49,13 @@ export default [
   // 3a. JS strict rules (NO TypeScript rules here)
   {
     files: ['**/*.{js,jsx}'],
+
+    languageOptions: {
+      globals: {
+        ...globals.node, // <-- 2. Enable Node globals (includes require, module, __dirname, etc.)
+      },
+      sourceType: 'commonjs', // <-- 3. Ensure CommonJS mode is recognized if using require
+    },
 
     settings: {
       jsdoc: {
