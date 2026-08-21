@@ -11,14 +11,24 @@ module.exports = {
     description: 'Statements after return/break/continue/exit/throw in the same block can never run.',
     severity: 'warning',
   },
-  create(context) {
+  /**
+   *
+   * @param context
+   */
+  create(context) 
+  {
     return {
-      BlockStatement(node) {
+      BlockStatement(node) 
+      {
         let terminatedAt = -1;
-        node.body.forEach((stmt, index) => {
-          if (terminatedAt === -1 && TERMINATORS.has(stmt.type)) {
+        node.body.forEach((stmt, index) => 
+        {
+          if (terminatedAt === -1 && TERMINATORS.has(stmt.type)) 
+          {
             terminatedAt = index;
-          } else if (terminatedAt !== -1 && stmt.type !== 'EmptyStatement') {
+          }
+          else if (terminatedAt !== -1 && stmt.type !== 'EmptyStatement') 
+          {
             context.report({ node: stmt, message: 'Unreachable code detected.' });
           }
         });

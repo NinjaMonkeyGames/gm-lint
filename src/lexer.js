@@ -94,10 +94,6 @@ function isIdentPart(ch)
  * @returns {{ tokens: object[], errors: GmlSyntaxError[] }} Tokenized array and any collected syntax errors.
  */
 /* eslint-disable complexity */
-/**
- *
- * @param source
- */
 function tokenize(source) 
 {
   const tokens = [];

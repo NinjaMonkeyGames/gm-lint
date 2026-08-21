@@ -1,48 +1,72 @@
 'use strict';
 
+/**
+ * @file ESLint rule to disallow continue statements outside of loops.
+ * @remarks GameMaker equivalent check for continue validity.
+ */
+
 const { isFunctionLike } = require('./_util');
 
-// Unlike break, continue is transparent through switch: `continue` inside
-// a switch-inside-a-loop continues the loop, so SwitchStatement is not a
-// valid target on its own - we just skip over it while searching outward.
+/**
+ * Continue targets accepted by GameMaker.
+ * @type {Set<string>}
+ * @constant
+ */
 const CONTINUE_TARGETS = new Set([
-  'ForStatement', 'WhileStatement', 'DoUntilStatement', 'RepeatStatement', 'WithStatement',
+  'ForStatement',
+  'WhileStatement',
+  'DoUntilStatement',
+  'RepeatStatement',
+  'WithStatement',
 ]);
 
 module.exports = {
   id: 'GM1001',
   meta: {
     description:
-      'No enclosing loop from which to continue. \'continue\' must appear inside the body ' +
-      'of a for/while/do-until/repeat/with loop - using it anywhere else (including bare ' +
-      'inside a switch with no surrounding loop) is a compile error in GameMaker.',
+      'No enclosing loop from which to continue. \'continue\' must appear inside the body of a ' +
+      'loop (for/while/do-until/repeat/with) - using it anywhere else (including inside a switch ' +
+      'without a surrounding loop) is a compile error in GameMaker.',
     severity: 'error',
   },
+
   /**
-   *
-   * @param context
+   * Creates the ESLint rule visitor.
+   * @public
+   * @param {import('eslint').Rule.RuleContext} context - The ESLint rule context.
+   * @returns {import('eslint').Rule.RuleListener} The rule listener methods.
    */
-  create(context) 
+  create(context)
   {
     return {
-      ContinueStatement(node, parent, ancestors) 
+      /**
+       * Validates continue statement placements.
+       * @public
+       * @param {import('estree').ContinueStatement} node - The continue node.
+       * @param {import('estree').Node} parent - The parent node.
+       * @param {import('estree').Node[]} ancestors - The ancestor nodes.
+       * @returns {void}
+       */
+      ContinueStatement(node, parent, ancestors)
       {
-        for (let i = ancestors.length - 1; i >= 0; i--) 
+        for (let i = ancestors.length - 1; i >= 0; i--)
         {
           const anc = ancestors[i];
-          if (isFunctionLike(anc)) 
+          // A continue can't reach past a function boundary to an outer loop.
+          if (isFunctionLike(anc))
           {
             break;
-          } // can't reach past a function boundary
-          if (CONTINUE_TARGETS.has(anc.type)) 
+          }
+          if (CONTINUE_TARGETS.has(anc.type))
           {
-            return;
-          } // valid
+            return; // valid
+          }
         }
+
         context.report({
           node,
-          message: 'No enclosing loop from which to continue. Remove this \'continue\' or move ' +
-            'it inside a for/while/do-until/repeat/with loop.',
+          message: 'No enclosing loop from which to continue. Remove this \'continue\' or move it ' +
+            'inside a for/while/do-until/repeat/with loop.',
         });
       },
     };

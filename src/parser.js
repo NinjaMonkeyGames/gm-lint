@@ -32,15 +32,16 @@ const ASSIGNMENT_OPERATORS = new Set([
 ]);
 
 /**
- *
+ * GML Parser core.
  */
 class Parser 
 {
   /**
-   *
-   * @param source
-   * @param root0
-   * @param root0.filename
+   * Creates an instance of Parser.
+   * @public
+   * @param {string} source - The raw GML source text.
+   * @param {object} [options={}] - Parser options.
+   * @param {string} [options.filename='<input>'] - Source filename.
    */
   constructor(source, { filename = '<input>' } = {}) 
   {
@@ -59,8 +60,10 @@ class Parser
   // ---- token helpers -----------------------------------------------
 
   /**
-   *
-   * @param offset
+   * Looks ahead at a token by an offset.
+   * @public
+   * @param {number} [offset=0] - Token lookahead offset.
+   * @returns {object} The looked-ahead token.
    */
   peek(offset = 0) 
   {
@@ -68,9 +71,11 @@ class Parser
   }
 
   /**
-   *
-   * @param type
-   * @param value
+   * Checks if the current token matches type and optional value.
+   * @public
+   * @param {string} type - Expected token type.
+   * @param {string|string[]} [value] - Expected token value or array of values.
+   * @returns {boolean} True if matched.
    */
   at(type, value) 
   {
@@ -87,8 +92,10 @@ class Parser
   }
 
   /**
-   *
-   * @param value
+   * Checks if current token is a punctuator with a specific value.
+   * @public
+   * @param {string} value - Punctuator value.
+   * @returns {boolean} True if matched.
    */
   atPunct(value) 
   {
@@ -96,8 +103,10 @@ class Parser
   }
 
   /**
-   *
-   * @param value
+   * Checks if current token is a keyword with a specific value.
+   * @public
+   * @param {string|string[]} value - Keyword value or values.
+   * @returns {boolean} True if matched.
    */
   atKeyword(value) 
   {
@@ -105,7 +114,9 @@ class Parser
   }
 
   /**
-   *
+   * Consumes and returns the current token, advancing the pointer.
+   * @public
+   * @returns {object} The consumed token.
    */
   next() 
   {
@@ -118,10 +129,12 @@ class Parser
   }
 
   /**
-   *
-   * @param type
-   * @param value
-   * @param context
+   * Expects a specific token type and value, recording an error if missing.
+   * @public
+   * @param {string} type - Expected token type.
+   * @param {string} [value] - Expected token value.
+   * @param {string} [context] - Error context description.
+   * @returns {object} The consumed or current token.
    */
   expect(type, value, context) 
   {
@@ -142,9 +155,11 @@ class Parser
   }
 
   /**
-   *
-   * @param message
-   * @param token
+   * Records a syntax error.
+   * @public
+   * @param {string} message - Error message.
+   * @param {object} [token=this.peek()] - Associated token.
+   * @returns {void}
    */
   error(message, token = this.peek()) 
   {
@@ -154,7 +169,9 @@ class Parser
   // Skip tokens until we reach a statement boundary, so one syntax error
   // doesn't prevent the rest of the file from being linted.
   /**
-   *
+   * Synchronizes parser state after a syntax error.
+   * @public
+   * @returns {void}
    */
   synchronize() 
   {
@@ -176,8 +193,10 @@ class Parser
   }
 
   /**
-   *
-   * @param startToken
+   * Creates location metadata for an AST node.
+   * @public
+   * @param {object} startToken - The starting token.
+   * @returns {{ line: number, column: number }} Location object.
    */
   loc(startToken) 
   {
@@ -187,7 +206,9 @@ class Parser
   // ---- entry point ----------------------------------------------------
 
   /**
-   *
+   * Parses the entire GML program.
+   * @public
+   * @returns {object} The Program AST node.
    */
   parseProgram() 
   {
@@ -229,7 +250,9 @@ class Parser
   // ---- statements -------------------------------------------------
 
   /**
-   *
+   * Parses a single statement.
+   * @public
+   * @returns {object} Statement AST node.
    */
   parseStatement() 
   {
@@ -318,7 +341,9 @@ class Parser
   }
 
   /**
-   *
+   * Consumes an optional semicolon.
+   * @public
+   * @returns {void}
    */
   consumeSemi() 
   {
@@ -329,7 +354,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a block statement.
+   * @public
+   * @returns {object} BlockStatement AST node.
    */
   parseBlock() 
   {
@@ -348,7 +375,11 @@ class Parser
     return { type: 'BlockStatement', body, loc: this.loc(start) };
   }
 
-  /** A block, or (GML allows) a single statement, e.g. `if (x) y = 1;` */
+  /**
+   * Parses a block or a single statement.
+   * @public
+   * @returns {object} Statement AST node.
+   */
   parseBlockOrStatement() 
   {
     if (this.atPunct('{')) 
@@ -359,7 +390,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses variable declarations.
+   * @public
+   * @returns {object} VariableDeclaration AST node.
    */
   parseVarDeclaration() 
   {
@@ -387,7 +420,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a function declaration.
+   * @public
+   * @returns {object} FunctionDeclaration AST node.
    */
   parseFunctionDeclaration() 
   {
@@ -425,7 +460,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses function parameters.
+   * @public
+   * @returns {object[]} Array of parameter objects.
    */
   parseParams() 
   {
@@ -460,7 +497,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses an if statement.
+   * @public
+   * @returns {object} IfStatement AST node.
    */
   parseIf() 
   {
@@ -483,7 +522,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a for loop statement.
+   * @public
+   * @returns {object} ForStatement AST node.
    */
   parseFor() 
   {
@@ -515,7 +556,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a while loop statement.
+   * @public
+   * @returns {object} WhileStatement AST node.
    */
   parseWhile() 
   {
@@ -528,7 +571,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a repeat loop statement.
+   * @public
+   * @returns {object} RepeatStatement AST node.
    */
   parseRepeat() 
   {
@@ -541,7 +586,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a do-until loop statement.
+   * @public
+   * @returns {object} DoUntilStatement AST node.
    */
   parseDoUntil() 
   {
@@ -556,7 +603,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a switch statement.
+   * @public
+   * @returns {object} SwitchStatement AST node.
    */
   parseSwitch() 
   {
@@ -593,7 +642,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a with statement.
+   * @public
+   * @returns {object} WithStatement AST node.
    */
   parseWith() 
   {
@@ -606,7 +657,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a try-catch-finally statement.
+   * @public
+   * @returns {object} TryStatement AST node.
    */
   parseTry() 
   {
@@ -640,7 +693,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a return statement.
+   * @public
+   * @returns {object} ReturnStatement AST node.
    */
   parseReturn() 
   {
@@ -655,7 +710,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a throw statement.
+   * @public
+   * @returns {object} ThrowStatement AST node.
    */
   parseThrow() 
   {
@@ -666,7 +723,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a delete statement.
+   * @public
+   * @returns {object} DeleteStatement AST node.
    */
   parseDeleteStatement() 
   {
@@ -677,7 +736,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses an enum declaration.
+   * @public
+   * @returns {object} EnumDeclaration AST node.
    */
   parseEnum() 
   {
@@ -714,7 +775,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses an expression statement.
+   * @public
+   * @returns {object} ExpressionStatement AST node.
    */
   parseExpressionStatement() 
   {
@@ -727,7 +790,9 @@ class Parser
   // ---- expressions --------------------------------------------------
 
   /**
-   *
+   * Parses an expression.
+   * @public
+   * @returns {object} Expression AST node.
    */
   parseExpression() 
   {
@@ -735,7 +800,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses an assignment expression.
+   * @public
+   * @returns {object} Expression AST node.
    */
   parseAssignment() 
   {
@@ -751,7 +818,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a conditional (ternary) expression.
+   * @public
+   * @returns {object} Expression AST node.
    */
   parseConditional() 
   {
@@ -769,7 +838,9 @@ class Parser
   }
 
   /**
-   *
+   * Gets the normalized operator for the current token.
+   * @public
+   * @returns {string|null} Normalized operator string or null.
    */
   normalizedOperator() 
   {
@@ -787,8 +858,10 @@ class Parser
   }
 
   /**
-   *
-   * @param minPrecedence
+   * Parses binary expressions using operator precedence.
+   * @public
+   * @param {number} minPrecedence - Minimum operator precedence.
+   * @returns {object} Expression AST node.
    */
   parseBinary(minPrecedence) 
   {
@@ -821,7 +894,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a unary expression.
+   * @public
+   * @returns {object} Expression AST node.
    */
   parseUnary() 
   {
@@ -847,7 +922,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses a postfix expression.
+   * @public
+   * @returns {object} Expression AST node.
    */
   parsePostfix() 
   {
@@ -862,8 +939,10 @@ class Parser
   }
 
   /**
-   *
-   * @param base
+   * Parses call and member expressions.
+   * @public
+   * @param {object} base - Base expression.
+   * @returns {object} Expression AST node.
    */
   parseCallMemberExpression(base) 
   {
@@ -922,8 +1001,10 @@ class Parser
   }
 
   /**
-   *
-   * @param callee
+   * Parses a call expression.
+   * @public
+   * @param {object} callee - Callee expression.
+   * @returns {object} CallExpression AST node.
    */
   parseCallExpression(callee) 
   {
@@ -946,7 +1027,9 @@ class Parser
   }
 
   /**
-   *
+   * Parses primary expressions (literals, identifiers, arrays, structs, etc.).
+   * @public
+   * @returns {object} Expression AST node.
    */
   parsePrimary() 
   {
@@ -1057,8 +1140,10 @@ class Parser
  * Parse GML source into an AST. Always returns a Program node; parse
  * errors are collected on `program.errors` rather than thrown, so the
  * linter can keep running rules against whatever did parse.
- * @param source
- * @param options
+ * @public
+ * @param {string} source - The raw GML source text.
+ * @param {object} [options] - Parser options.
+ * @returns {object} The Program AST node.
  */
 function parse(source, options) 
 {
