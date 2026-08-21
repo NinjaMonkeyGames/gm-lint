@@ -4,7 +4,7 @@ const TERMINATORS = new Set(['ReturnStatement', 'BreakStatement', 'ContinueState
 
 // Not an official Feather GM-numbered rule (Feather doesn't publish a
 // stable ID for this one), but it mirrors the "unreachable code" warning
-// the GameMaker editor's static analysis gives you[cite: 7].
+// the GameMaker editor's static analysis gives you[cite: 13].
 export default {
   id: 'no-unreachable-code',
   meta: {
@@ -12,8 +12,9 @@ export default {
     severity: 'warning',
   },
   /**
-   *
-   * @param context
+   * Creates the lint rule visitor handlers for detecting unreachable code blocks.
+   * @param {object} context - The linting context providing reporting utilities.
+   * @returns {object} An object mapping AST node types to visitor functions.
    */
   create(context) 
   {

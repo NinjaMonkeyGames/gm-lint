@@ -3,6 +3,11 @@
 import fs from 'fs';
 import path from 'path';
 
+/**
+ * Converts a glob segment pattern into a regular expression.
+ * @param {string} segment - The glob path segment to convert.
+ * @returns {RegExp} The corresponding regular expression.
+ */
 function segmentToRegExp(segment) 
 {
   let pattern = '';
@@ -26,10 +31,11 @@ function segmentToRegExp(segment)
 
 /**
  * Small synchronous glob supporting `*`, `?`, and `**` across path
- * segments. Good enough for lint file patterns (e.g. `src/**\/*.gml`)
- * without pulling in a dependency.
- * @param pattern
- * @param cwd
+ * segments. Good enough for lint file patterns (e.g. `src/&#42;&#42;/&#42;.gml`)
+ * without pulling in a dependency[cite: 3].
+ * @param {string} pattern - The glob pattern to match files against.
+ * @param {string} [cwd] - The current working directory to resolve relative paths from.
+ * @returns {string[]} A sorted array of matched absolute file paths.
  */
 function globSync(pattern, cwd = process.cwd()) 
 {
@@ -97,6 +103,13 @@ function globSync(pattern, cwd = process.cwd())
   return matches.sort();
 }
 
+/**
+ * Recursively collects matching files or directories under a base directory.
+ * @param {string} base - The base directory path to search within.
+ * @param {boolean} wantFiles - Flag indicating whether to collect files (true) or directories (false).
+ * @param {string[]} out - The output array accumulating matched paths.
+ * @returns {void}
+ */
 function collectRecursive(base, wantFiles, out) 
 {
   let entries;

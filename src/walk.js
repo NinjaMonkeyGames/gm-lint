@@ -6,7 +6,8 @@
  * hand-maintained "visitor keys" table like estraverse does - we just walk
  * every enumerable property and recurse into anything that looks like a
  * node or an array of nodes[cite: 6].
- * @param value
+ * @param {any} value - The value to check.
+ * @returns {boolean} True if the value represents an AST node.
  */
 function isNode(value) 
 {
@@ -14,11 +15,12 @@ function isNode(value)
 }
 
 /**
- *
- * @param node
- * @param visitors
- * @param parent
- * @param ancestors
+ * Recursively traverses an AST node and its children, invoking visitor functions.
+ * @param {object} node - The current AST node being traversed.
+ * @param {object} visitors - An object containing visitor functions mapped by node type or '*' for all nodes.
+ * @param {object|null} [parent] - The parent node of the current node.
+ * @param {object[]} [ancestors] - An array containing all ancestor nodes up to the root.
+ * @returns {void}
  */
 function walk(node, visitors, parent = null, ancestors = []) 
 {

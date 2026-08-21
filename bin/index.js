@@ -2,11 +2,13 @@
 'use strict';
 
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { Engine } from '../src/engine.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Stream helper for CLI output
+const stdout = (msg = '') => process.stdout.write(msg + '\n');
+
+// Constants replacing magic numbers
+const ARG_OFFSET = 2;
 
 const COLOR = {
   red: (s) => `\x1b[31m${s}\x1b[0m`,
@@ -39,7 +41,7 @@ function parseArgs(argv)
 
 function printHelp() 
 {
-  console.log(`gml-lint - a Feather-inspired linter for GameMaker Language (GML)
+  stdout(`gml-lint - a Feather-inspired linter for GameMaker Language (GML)
 
 Usage:
   gml-lint [patterns...] [--rules-dir <dir>]
@@ -73,7 +75,7 @@ function formatResult(result)
 
 async function main() 
 {
-  const args = parseArgs(process.argv.slice(2));
+  const args = parseArgs(process.argv.slice(ARG_OFFSET));
   if (args.help) 
   {
     printHelp();
@@ -83,17 +85,16 @@ async function main()
   const patterns = args.patterns.length > 0 ? args.patterns : ['src/rules/gm*.gml'];
   const engine = new Engine(args.rulesDir ? { rulesDir: path.resolve(args.rulesDir) } : {});
 
-  // Await the asynchronous loading of rules now that they are ES Modules
   await engine.loadRulesAsync();
 
-  console.log(COLOR.gray(`Loaded ${engine.rules.length} rule(s): ${engine.rules.map((r) => r.id).join(', ')}`));
-  console.log(COLOR.gray(`Linting: ${patterns.join(', ')}`));
+  stdout(COLOR.gray(`Loaded ${engine.rules.length} rule(s): ${engine.rules.map((r) => r.id).join(', ')}`));
+  stdout(COLOR.gray(`Linting: ${patterns.join(', ')}`));
 
   const results = engine.lintFiles(patterns);
 
   if (results.length === 0) 
   {
-    console.log(COLOR.yellow(`No files matched ${patterns.join(', ')}`));
+    stdout(COLOR.yellow(`No files matched ${patterns.join(', ')}`));
     process.exitCode = 0;
     return;
   }
@@ -105,20 +106,20 @@ async function main()
     if (lines.length) 
     {
       printedAny = true;
-      console.log('');
-      console.log(lines.join('\n'));
+      stdout('');
+      stdout(lines.join('\n'));
     }
   }
 
   const { errors, warnings } = Engine.countBySeverity(results);
-  console.log('');
+  stdout('');
   if (!printedAny) 
   {
-    console.log(`${results.length} file(s) checked, no issues found.`);
+    stdout(`${results.length} file(s) checked, no issues found.`);
   }
   else 
   {
-    console.log(
+    stdout(
       `${results.length} file(s) checked - ` +
         `${COLOR.red(`${errors} error(s)`)}, ${COLOR.yellow(`${warnings} warning(s)`)}.`,
     );

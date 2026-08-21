@@ -40,8 +40,8 @@ class Parser
    * Creates an instance of Parser.
    * @public
    * @param {string} source - The raw GML source text.
-   * @param {object} [options={}] - Parser options.
-   * @param {string} [options.filename='<input>'] - Source filename.
+   * @param {object} [options] - Parser options.
+   * @param {string} [options.filename] - Source filename.
    */
   constructor(source, { filename = '<input>' } = {}) 
   {
@@ -62,7 +62,7 @@ class Parser
   /**
    * Looks ahead at a token by an offset.
    * @public
-   * @param {number} [offset=0] - Token lookahead offset.
+   * @param {number} [offset] - Token lookahead offset.
    * @returns {object} The looked-ahead token.
    */
   peek(offset = 0) 
@@ -158,7 +158,7 @@ class Parser
    * Records a syntax error.
    * @public
    * @param {string} message - Error message.
-   * @param {object} [token=this.peek()] - Associated token.
+   * @param {object} [token] - Associated token.
    * @returns {void}
    */
   error(message, token = this.peek()) 

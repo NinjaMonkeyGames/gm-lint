@@ -1,12 +1,12 @@
-// Total[1]
+// Diabolical Test Case: Nested scope traps with control flow and initializers
 
-var _items = get_items();
-var i = 0;
-repeat (array_length(_items))
-{
-    var _item = _items[i++];
-    if (_item == undefined)
-        break; // Good!
-    // ... Some logic here ...
-}
-break; // GM1000 - No loop to break from.
+globalvar bad_global = 10; // GM1002: globalvar with initializer
+
+function tricky_scope_test(
+    callback = function() {
+        // This break is inside an anonymous function parameter default value, 
+        // nested inside a function declaration. 
+        // It has NO enclosing loop or switch whatsoever.
+        break; // GM1000 violation (must be caught)
+    }
+) 

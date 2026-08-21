@@ -8,10 +8,11 @@ const FUNCTION_TYPES = new Set(['FunctionDeclaration', 'FunctionExpression']);
  * Collect every name declared directly within `scopeBody` (var/static
  * declarations, function params, function statement names, for-loop
  * initializers, catch params) WITHOUT descending into nested function
- * bodies - those are their own scope.
- * @param scopeBody
- * @param root0
- * @param root0.includeOwnParams
+ * bodies - those are their own scope[cite: 12].
+ * @param {object} scopeBody - The AST node representing the function or block scope body.
+ * @param {object} [options] - Configuration options.
+ * @param {string[]} [options.includeOwnParams] - Additional parameter names to include initially.
+ * @returns {Set<string>} A set of declared identifier names.
  */
 function collectDeclaredNames(scopeBody, { includeOwnParams = [] } = {}) 
 {
@@ -33,11 +34,11 @@ function collectDeclaredNames(scopeBody, { includeOwnParams = [] } = {})
     else if (node.type === 'FunctionDeclaration' && node.id) 
     {
       names.add(node.id.name);
-      return; // don't descend into the nested function's own scope
+      return; // don't descend into the nested function's own scope[cite: 12]
     }
     else if (node.type === 'FunctionExpression') 
     {
-      return; // nested scope
+      return; // nested scope[cite: 12]
     }
     else if (node.type === 'CatchClause' && node.param) 
     {
@@ -70,8 +71,9 @@ function collectDeclaredNames(scopeBody, { includeOwnParams = [] } = {})
 }
 
 /**
- *
- * @param node
+ * Determines whether an AST node is a function-like declaration or expression.
+ * @param {object} node - The AST node to check.
+ * @returns {boolean} True if the node is a function declaration or expression.
  */
 function isFunctionLike(node) 
 {
@@ -79,8 +81,9 @@ function isFunctionLike(node)
 }
 
 /**
- * Walk up `ancestors` to find the nearest enclosing function-like node, if any.
- * @param ancestors
+ * Walk up `ancestors` to find the nearest enclosing function-like node, if any[cite: 12].
+ * @param {object[]} ancestors - An array of ancestor AST nodes leading to the current node.
+ * @returns {object|null} The enclosing function-like node, or null if none is found.
  */
 function enclosingFunction(ancestors) 
 {
