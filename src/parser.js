@@ -1,6 +1,6 @@
 'use strict';
 
-const { tokenize, GmlSyntaxError } = require('./lexer');
+import { tokenize, GmlSyntaxError } from './lexer.js';
 
 // Binary operator precedence, low -> high. Keyword aliases (and/or/etc)
 // are normalized to their symbolic equivalents during parsing.
@@ -1151,4 +1151,4 @@ function parse(source, options)
   return parser.parseProgram();
 }
 
-module.exports = { parse, Parser };
+export { parse, Parser };

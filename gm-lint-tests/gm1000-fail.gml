@@ -1,5 +1,7 @@
 // Total[1]
 
+// Trigger
+
 var _items = get_items();
 var i = 0;
 repeat (array_length(_items))

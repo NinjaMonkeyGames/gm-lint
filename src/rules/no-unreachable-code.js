@@ -4,8 +4,8 @@ const TERMINATORS = new Set(['ReturnStatement', 'BreakStatement', 'ContinueState
 
 // Not an official Feather GM-numbered rule (Feather doesn't publish a
 // stable ID for this one), but it mirrors the "unreachable code" warning
-// the GameMaker editor's static analysis gives you.
-module.exports = {
+// the GameMaker editor's static analysis gives you[cite: 7].
+export default {
   id: 'no-unreachable-code',
   meta: {
     description: 'Statements after return/break/continue/exit/throw in the same block can never run.',

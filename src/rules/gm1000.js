@@ -5,10 +5,10 @@
  * @remarks GameMaker equivalent check for break validity.
  */
 
-const { isFunctionLike } = require('./_util');
+import { isFunctionLike } from './_util.js';
 
 /**
- * Break targets accepted by GameMaker.
+ * Break targets accepted by GameMaker (loops and switch statements).
  * @type {Set<string>}
  * @constant
  */
@@ -21,13 +21,12 @@ const BREAK_TARGETS = new Set([
   'SwitchStatement',
 ]);
 
-module.exports = {
+export default {
   id: 'GM1000',
   meta: {
     description:
-      'No enclosing loop from which to break. \'break\' must appear inside the body of a ' +
-      'loop (for/while/do-until/repeat/with) or a switch statement - using it anywhere ' +
-      'else is a compile error in GameMaker.',
+      'No enclosing loop or switch from which to break. \'break\' must appear inside the body ' +
+      'of a loop or switch statement - using it anywhere else is a compile error in GameMaker.',
     severity: 'error',
   },
 
@@ -53,7 +52,7 @@ module.exports = {
         for (let i = ancestors.length - 1; i >= 0; i--)
         {
           const anc = ancestors[i];
-          // A break can't reach past a function boundary to an outer loop.
+          // A break can't reach past a function boundary to an outer loop/switch.
           if (isFunctionLike(anc))
           {
             break;
@@ -66,8 +65,8 @@ module.exports = {
 
         context.report({
           node,
-          message: 'No enclosing loop from which to break. Remove this \'break\' or move it ' +
-            'inside a for/while/do-until/repeat/with loop or a switch statement.',
+          message: 'No enclosing loop or switch from which to break. Remove this \'break\' or move it ' +
+            'inside a loop (for/while/do-until/repeat/with) or switch statement.',
         });
       },
     };

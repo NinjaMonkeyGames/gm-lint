@@ -1,7 +1,7 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 function segmentToRegExp(segment) 
 {
@@ -126,4 +126,4 @@ function collectRecursive(base, wantFiles, out)
   }
 }
 
-module.exports = { globSync };
+export { globSync };

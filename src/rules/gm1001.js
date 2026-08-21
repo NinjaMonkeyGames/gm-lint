@@ -5,7 +5,7 @@
  * @remarks GameMaker equivalent check for continue validity.
  */
 
-const { isFunctionLike } = require('./_util');
+import { isFunctionLike } from './_util.js';
 
 /**
  * Continue targets accepted by GameMaker.
@@ -20,7 +20,7 @@ const CONTINUE_TARGETS = new Set([
   'WithStatement',
 ]);
 
-module.exports = {
+export default {
   id: 'GM1001',
   meta: {
     description:

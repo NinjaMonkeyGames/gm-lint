@@ -25,6 +25,6 @@
     "typescript-eslint": "^8.67.0"
   },
   "name": "gm-lint",
-  "type": "commonjs",
+  "type": "module",
   "version": "0.1.0"
 }

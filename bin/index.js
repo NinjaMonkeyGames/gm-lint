@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 'use strict';
 
-const path = require('path');
-const { Engine } = require('../src/engine');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { Engine } from '../src/engine.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const COLOR = {
   red: (s) => `\x1b[31m${s}\x1b[0m`,
@@ -11,22 +15,30 @@ const COLOR = {
   bold: (s) => `\x1b[1m${s}\x1b[0m`,
 };
 
-function parseArgs(argv) {
+function parseArgs(argv) 
+{
   const args = { patterns: [], rulesDir: null };
-  for (let i = 0; i < argv.length; i++) {
+  for (let i = 0; i < argv.length; i++) 
+  {
     const arg = argv[i];
-    if (arg === '--rules-dir') {
+    if (arg === '--rules-dir') 
+    {
       args.rulesDir = argv[++i];
-    } else if (arg === '--help' || arg === '-h') {
+    }
+    else if (arg === '--help' || arg === '-h') 
+    {
       args.help = true;
-    } else {
+    }
+    else 
+    {
       args.patterns.push(arg);
     }
   }
   return args;
 }
 
-function printHelp() {
+function printHelp() 
+{
   console.log(`gml-lint - a Feather-inspired linter for GameMaker Language (GML)
 
 Usage:
@@ -42,11 +54,16 @@ Examples:
 `);
 }
 
-function formatResult(result) {
+function formatResult(result) 
+{
   const lines = [];
-  if (result.messages.length === 0) return lines;
+  if (result.messages.length === 0) 
+  {
+    return lines;
+  }
   lines.push(COLOR.bold(path.relative(process.cwd(), result.filePath)));
-  for (const msg of result.messages) {
+  for (const msg of result.messages) 
+  {
     const tag = msg.severity === 'error' ? COLOR.red('error') : COLOR.yellow('warning');
     const location = COLOR.gray(`${msg.line}:${msg.column}`);
     lines.push(`  ${location}  ${tag}  ${msg.message}  ${COLOR.gray(msg.ruleId)}`);
@@ -54,9 +71,11 @@ function formatResult(result) {
   return lines;
 }
 
-function main() {
+async function main() 
+{
   const args = parseArgs(process.argv.slice(2));
-  if (args.help) {
+  if (args.help) 
+  {
     printHelp();
     return;
   }
@@ -64,21 +83,27 @@ function main() {
   const patterns = args.patterns.length > 0 ? args.patterns : ['src/rules/gm*.gml'];
   const engine = new Engine(args.rulesDir ? { rulesDir: path.resolve(args.rulesDir) } : {});
 
+  // Await the asynchronous loading of rules now that they are ES Modules
+  await engine.loadRulesAsync();
+
   console.log(COLOR.gray(`Loaded ${engine.rules.length} rule(s): ${engine.rules.map((r) => r.id).join(', ')}`));
   console.log(COLOR.gray(`Linting: ${patterns.join(', ')}`));
 
   const results = engine.lintFiles(patterns);
 
-  if (results.length === 0) {
+  if (results.length === 0) 
+  {
     console.log(COLOR.yellow(`No files matched ${patterns.join(', ')}`));
     process.exitCode = 0;
     return;
   }
 
   let printedAny = false;
-  for (const result of results) {
+  for (const result of results) 
+  {
     const lines = formatResult(result);
-    if (lines.length) {
+    if (lines.length) 
+    {
       printedAny = true;
       console.log('');
       console.log(lines.join('\n'));
@@ -87,9 +112,12 @@ function main() {
 
   const { errors, warnings } = Engine.countBySeverity(results);
   console.log('');
-  if (!printedAny) {
+  if (!printedAny) 
+  {
     console.log(`${results.length} file(s) checked, no issues found.`);
-  } else {
+  }
+  else 
+  {
     console.log(
       `${results.length} file(s) checked - ` +
         `${COLOR.red(`${errors} error(s)`)}, ${COLOR.yellow(`${warnings} warning(s)`)}.`,

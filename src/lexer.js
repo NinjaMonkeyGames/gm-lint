@@ -340,4 +340,4 @@ function tokenize(source)
 }
 /* eslint-enable complexity */
 
-module.exports = { tokenize, GmlSyntaxError };
+export { tokenize, GmlSyntaxError };

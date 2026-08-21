@@ -2,10 +2,10 @@
 
 /**
  * @file ESLint rule to disallow duplicate enum member names within the same enum declaration.
- * @remarks GameMaker equivalent check for GM1004.
+ * @remarks GameMaker equivalent check for GM1004[cite: 14].
  */
 
-module.exports = {
+export default {
   id: 'GM1004',
   meta: {
     description:

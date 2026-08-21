@@ -5,8 +5,8 @@
  * @remarks GameMaker equivalent scope checker for unused variables.
  */
 
-const { walk, isNode } = require('../walk');
-const { isFunctionLike } = require('./_util');
+import { walk, isNode } from '../walk.js';
+import { isFunctionLike } from './_util.js';
 
 /**
  * Declarators declared directly in scopeNode, not inside nested functions.
@@ -125,7 +125,7 @@ function countUsages(scopeNode, name)
   return count;
 }
 
-module.exports = {
+export default {
   id: 'no-unused-local-var',
   meta: {
     description: 'A \'var\'/\'static\' local is declared but its value is never read again.',

@@ -54,7 +54,7 @@ export default [
       globals: {
         ...globals.node, // <-- 2. Enable Node globals (includes require, module, __dirname, etc.)
       },
-      sourceType: 'commonjs', // <-- 3. Ensure CommonJS mode is recognized if using require
+      sourceType: 'module', // <-- 3. Ensure CommonJS mode is recognized if using require
     },
 
     settings: {

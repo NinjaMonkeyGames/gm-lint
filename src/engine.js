@@ -5,12 +5,16 @@
  * @remarks Linter engine core.
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
 
-const { parse } = require('./parser');
-const { walk } = require('./walk');
-const { globSync } = require('./glob');
+import { parse } from './parser.js';
+import { walk } from './walk.js';
+import { globSync } from './glob.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const SEVERITY = { off: 0, warning: 1, error: 2 };
 
@@ -19,7 +23,7 @@ const SEVERITY = { off: 0, warning: 1, error: 2 };
  *
  * A rule module looks like:
  *
- *   module.exports = {
+ *   export default {
  *     id: 'GM1013',
  *     meta: { description: '...', severity: 'error' },
  *     create(context) {
@@ -42,15 +46,16 @@ class Engine
   {
     this.rulesDir = rulesDir;
     this.config = config; // e.g. { 'GM1013': 'off' }
-    this.rules = this.loadRules();
+    this.rules = [];
   }
 
   /**
-   * Loads lint rules from the rules directory.
+   * Asynchronously loads lint rules from the rules directory.
+   * Note: In ESM, dynamic loading via import() is asynchronous.
    * @public
-   * @returns {object[]} Sorted array of loaded rule objects.
+   * @returns {Promise<object[]>} Sorted array of loaded rule objects.
    */
-  loadRules()
+  async loadRulesAsync()
   {
     const rules = [];
     let entries;
@@ -69,17 +74,39 @@ class Engine
         continue;
       }
       const modulePath = path.join(this.rulesDir, entry.name);
-      // eslint-disable-next-line import/no-dynamic-require
-      const rule = require(modulePath);
-      if (!rule || !rule.id || typeof rule.create !== 'function')
+      try
+      {
+        // Dynamic import requires a file URL on many platforms
+        const imported = await import(pathToFileURL(modulePath).href);
+        const rule = imported.default || imported;
+        if (!rule || !rule.id || typeof rule.create !== 'function')
+        {
+          // eslint-disable-next-line no-console
+          console.warn(`Skipping ${entry.name}: not a valid rule module (needs id + create()).`);
+          continue;
+        }
+        rules.push(rule);
+      }
+      catch (err)
       {
         // eslint-disable-next-line no-console
-        console.warn(`Skipping ${entry.name}: not a valid rule module (needs id + create()).`);
-        continue;
+        console.warn(`Failed to load rule ${entry.name}: ${err.message}`);
       }
-      rules.push(rule);
     }
-    return rules.sort((a, b) => a.id.localeCompare(b.id));
+    this.rules = rules.sort((a, b) => a.id.localeCompare(b.id));
+    return this.rules;
+  }
+
+  /**
+   * Synchronous fallback load rules for compatibility if rules are preloaded or cached.
+   * @public
+   * @returns {object[]} Sorted array of loaded rule objects.
+   */
+  loadRules()
+  {
+    // If rules were already loaded via async, return them; otherwise return empty array
+    // (In ESM, dynamic imports are async, so loadRulesAsync should be preferred).
+    return this.rules;
   }
 
   /**
@@ -245,4 +272,4 @@ class Engine
   }
 }
 
-module.exports = { Engine, SEVERITY };
+export { Engine, SEVERITY };
