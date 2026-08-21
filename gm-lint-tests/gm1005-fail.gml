@@ -1,0 +1,1 @@
+draw_set_color(); // GM1005 - Argument must be provided.
