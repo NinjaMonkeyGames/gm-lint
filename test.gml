@@ -1,10 +1,2 @@
-function check_number(val) {
-    if (val > 10) {
-        return true;
-    } else {
-        return false;
-    }
-    
-    // This code is truly unreachable, correctly flagged:
-    var extra = 5; 
-}
+#macro DEFAULT_VAL 5
+globalvar score = DEFAULT_VAL; // GM1002 - globalvar does not support inline initializers.[cite: 13]

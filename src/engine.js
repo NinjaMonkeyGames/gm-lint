@@ -34,9 +34,9 @@ class Engine
   /**
    * Creates an instance of Engine.
    * @public
-   * @param {object} [options={}] - Engine options.
-   * @param {string} [options.rulesDir=path.join(__dirname, 'rules')] - Directory containing rules.
-   * @param {object} [options.config={}] - Configuration object for rules.
+   * @param {object} [options] - Engine options.
+   * @param {string} [options.rulesDir] - Directory containing rules.
+   * @param {object} [options.config] - Configuration object for rules.
    */
   constructor({ rulesDir = path.join(__dirname, 'rules'), config = {} } = {})
   {
@@ -199,8 +199,8 @@ class Engine
    * Lint every file matching one or more glob patterns.
    * @public
    * @param {string|string[]} patterns - Glob pattern or patterns.
-   * @param {object} [options={}] - Lint options.
-   * @param {string} [options.cwd=process.cwd()] - Current working directory.
+   * @param {object} [options] - Lint options.
+   * @param {string} [options.cwd] - Current working directory.
    * @returns {object[]} Array of lint results.
    */
   lintFiles(patterns, { cwd = process.cwd() } = {})
