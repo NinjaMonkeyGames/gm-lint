@@ -6,9 +6,9 @@
  */
 
 /**
- * Checks if an AST expression node evaluates to or represents a valid integer.
+ * Checks if an AST expression node evaluates to or represents a valid integer or reference.
  * @param {object} node - The AST node to check.
- * @returns {boolean} True if it's an integer expression.
+ * @returns {boolean} True if it's a valid integer expression or constant reference.
  */
 function isIntegerExpression(node)
 {
@@ -23,16 +23,28 @@ function isIntegerExpression(node)
     return true;
   }
 
-  // Unary expression for signed integers (e.g., -5, +5)
+  // Identifiers or MemberExpressions can be references to other enums, macros, or built-in constants
+  if (node.type === 'Identifier' || node.type === 'MemberExpression')
+  {
+    return true;
+  }
+
+  // Parenthesized expressions wrapping a valid integer or reference
+  if (node.type === 'ParenthesizedExpression')
+  {
+    return isIntegerExpression(node.expression);
+  }
+
+  // Unary expression for signed integers or bitwise negation (e.g., -5, +5, ~0)
   if (
     node.type === 'UnaryExpression' &&
-    (node.operator === '-' || node.operator === '+')
+    (node.operator === '-' || node.operator === '+' || node.operator === '~')
   )
   {
     return isIntegerExpression(node.argument);
   }
 
-  // Binary expression for arithmetic/bitwise operations (e.g., 1 << 0, 5 + 2)
+  // Binary expression for arithmetic/bitwise operations
   if (node.type === 'BinaryExpression')
   {
     const validOperators = new Set(['+', '-', '*', '/', '%', '<<', '>>', '&', '|', '^', 'div', 'mod']);
