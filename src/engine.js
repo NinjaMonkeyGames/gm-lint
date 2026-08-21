@@ -19,19 +19,38 @@ const __dirname = path.dirname(__filename);
 const SEVERITY = { off: 0, warning: 1, error: 2 };
 
 /**
+ * Helper to safely load and parse configuration files from disk with fallback options.
+ * @param {string} [configPath] - Optional explicit path to config file.
+ * @returns {object} The parsed configuration object.
+ */
+function loadConfigFile(configPath) 
+{
+  const possiblePaths = [
+    configPath,
+    path.resolve(process.cwd(), '.config/gm-lint.json'),
+    path.resolve(process.cwd(), 'gm-lint.json'),
+  ].filter(Boolean);
+
+  for (const resolvedPath of possiblePaths)
+  {
+    try 
+    {
+      if (fs.existsSync(resolvedPath)) 
+      {
+        const content = fs.readFileSync(resolvedPath, 'utf8');
+        return JSON.parse(content);
+      }
+    }
+    catch (err) 
+    {
+      process.stderr.write(`Error loading config file at ${resolvedPath}: ${err.message}\n`);
+    }
+  }
+  return {};
+}
+
+/**
  * Loads and runs Feather-inspired lint rules against GML source files.
- *
- * A rule module looks like:
- *
- *   export default {
- *     id: 'GM1013',
- *     meta: { description: '...', severity: 'error' },
- *     create(context) {
- *       return {
- *         Identifier(node) { context.report({ node, message: '...' }); },
- *       };
- *     },
- *   };
  */
 class Engine
 {
@@ -40,18 +59,22 @@ class Engine
    * @public
    * @param {object} [options] - Engine options.
    * @param {string} [options.rulesDir] - Directory containing rules.
+   * @param {string} [options.configFile] - Path to custom configuration file.
    * @param {object} [options.config] - Configuration object for rules.
    */
-  constructor({ rulesDir = path.join(__dirname, 'rules'), config = {} } = {})
+  constructor({ rulesDir, configFile, config } = {})
   {
-    this.rulesDir = rulesDir;
-    this.config = config; // e.g. { 'GM1013': 'off' }
+    const fileConfig = loadConfigFile(configFile);
+    this.rulesDir = rulesDir || fileConfig.rulesDir || path.join(__dirname, 'rules');
+    
+    // Support flat config or nested { config: { ... } } or { rules: { ... } } structures
+    const rawConfig = config || fileConfig.config || fileConfig;
+    this.config = rawConfig;
     this.rules = [];
   }
 
   /**
    * Asynchronously loads lint rules from the rules directory.
-   * Note: In ESM, dynamic loading via import() is asynchronous.
    * @public
    * @returns {Promise<object[]>} Sorted array of loaded rule objects.
    */
@@ -76,21 +99,18 @@ class Engine
       const modulePath = path.join(this.rulesDir, entry.name);
       try
       {
-        // Dynamic import requires a file URL on many platforms
         const imported = await import(pathToFileURL(modulePath).href);
         const rule = imported.default || imported;
         if (!rule || !rule.id || typeof rule.create !== 'function')
         {
-          // eslint-disable-next-line no-console
-          console.warn(`Skipping ${entry.name}: not a valid rule module (needs id + create()).`);
+          process.stderr.write(`Skipping ${entry.name}: not a valid rule module (needs id + create()).\n`);
           continue;
         }
         rules.push(rule);
       }
       catch (err)
       {
-        // eslint-disable-next-line no-console
-        console.warn(`Failed to load rule ${entry.name}: ${err.message}`);
+        process.stderr.write(`Failed to load rule ${entry.name}: ${err.message}\n`);
       }
     }
     this.rules = rules.sort((a, b) => a.id.localeCompare(b.id));
@@ -98,29 +118,29 @@ class Engine
   }
 
   /**
-   * Synchronous fallback load rules for compatibility if rules are preloaded or cached.
+   * Synchronous fallback load rules for compatibility.
    * @public
    * @returns {object[]} Sorted array of loaded rule objects.
    */
   loadRules()
   {
-    // If rules were already loaded via async, return them; otherwise return empty array
-    // (In ESM, dynamic imports are async, so loadRulesAsync should be preferred).
     return this.rules;
   }
 
   /**
-   * Gets the configured severity for a given rule.
+   * Gets the configured severity for a given rule, supporting root rules, nested rules blocks, or overrides.
    * @public
    * @param {object} rule - The rule object.
    * @returns {string|number} The severity level.
    */
   severityFor(rule)
   {
-    const override = this.config[rule.id];
+    const rulesBlock = this.config.rules || this.config;
+    const override = rulesBlock[rule.id];
+    
     if (override)
     {
-      return override;
+      return Array.isArray(override) ? override[0] : override;
     }
     return (rule.meta && rule.meta.severity) || 'warning';
   }
@@ -156,11 +176,15 @@ class Engine
         continue;
       }
 
+      const rulesBlock = this.config.rules || this.config;
+      const ruleEntry = rulesBlock[rule.id];
+      const ruleOptions = Array.isArray(ruleEntry) ? ruleEntry[1] : (this.config[`${rule.id}:options`] || {});
+
       const context = {
         filename,
         source,
         ast,
-        options: (this.config[`${rule.id}:options`]) || {},
+        options: ruleOptions,
         /**
          * Reports a lint issue.
          * @public
