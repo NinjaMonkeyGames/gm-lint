@@ -5,8 +5,6 @@
  * @remarks GameMaker equivalent check for continue validity.
  */
 
-import { isFunctionLike } from './_util.js';
-
 /**
  * Continue targets accepted by GameMaker.
  * @type {Set<string>}
@@ -52,14 +50,9 @@ export default {
         for (let i = ancestors.length - 1; i >= 0; i--)
         {
           const anc = ancestors[i];
-          // A continue can't reach past a function boundary to an outer loop.
-          if (isFunctionLike(anc))
-          {
-            break;
-          }
           if (CONTINUE_TARGETS.has(anc.type))
           {
-            return; // valid
+            return; // valid loop found
           }
         }
 

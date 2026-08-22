@@ -5,8 +5,6 @@
  * @remarks GameMaker equivalent check for break validity.
  */
 
-import { isFunctionLike } from './_util.js';
-
 /**
  * Break targets accepted by GameMaker (loops and switch statements).
  * @type {Set<string>}
@@ -33,8 +31,8 @@ export default {
   /**
    * Creates the ESLint rule visitor.
    * @public
-   * @param {import('eslint').Rule.RuleContext} context - The ESLint rule context.
-   * @returns {import('eslint').Rule.RuleListener} The rule listener methods.
+   * @param {object} context - The lint rule context.
+   * @returns {object} The rule listener methods.
    */
   create(context)
   {
@@ -42,24 +40,22 @@ export default {
       /**
        * Validates break statement placements.
        * @public
-       * @param {import('estree').BreakStatement} node - The break node.
-       * @param {import('estree').Node} parent - The parent node.
-       * @param {import('estree').Node[]} ancestors - The ancestor nodes.
+       * @param {object} node - The break node.
+       * @param {object} parent - The parent node.
+       * @param {object[]} ancestors - The ancestor nodes.
        * @returns {void}
        */
       BreakStatement(node, parent, ancestors)
       {
+        // Traverse backwards through ancestors to find a loop or switch target,
+        // completely ignoring function boundaries.
         for (let i = ancestors.length - 1; i >= 0; i--)
         {
           const anc = ancestors[i];
-          // A break can't reach past a function boundary to an outer loop/switch.
-          if (isFunctionLike(anc))
-          {
-            break;
-          }
+
           if (BREAK_TARGETS.has(anc.type))
           {
-            return; // valid
+            return; // Valid loop or switch found enclosing this break statement
           }
         }
 
