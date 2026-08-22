@@ -59,40 +59,41 @@ export default {
       /**
        * Validates continue statement placements.
        * @public
-       * @param {import('estree').ContinueStatement} node - The continue node.
-       * @param {import('estree').Node} parent - The parent node.
-       * @param {import('estree').Node[]} ancestors - The ancestor nodes.
+       * @param {object} node - The continue node.
+       * @param {object} parent - The parent node.
+       * @param {object[]} ancestors - The ancestor nodes.
        * @returns {void}
        */
       ContinueStatement(node, parent, ancestors)
       {
-        let hasLoop = false;
-        let hitFunctionBoundary = false;
+        let foundLoop = false;
 
         for (let i = ancestors.length - 1; i >= 0; i--)
         {
           const anc = ancestors[i];
 
+          // 1. If it's a valid loop target, we are good!
           if (CONTINUE_TARGETS.has(anc.type))
           {
-            hasLoop = true;
-            break;
+            foundLoop = true;
+            break; 
           }
 
+          // 2. If it's a function boundary, check if it's a transparent inline callback
           if (isFunctionLike(anc))
           {
             if (isInlineCallback(anc, ancestors, i))
             {
-              continue; // Transparent callback, keep looking outward
+              continue; // transparent, keep scanning outward
             }
-            hitFunctionBoundary = true;
-            break; // Hit a true function boundary
+            break; // true function boundary, stop scanning
           }
+
+          // 3. For everything else (SwitchStatement, SwitchCase, BlockStatement, etc.), 
+          // do nothing and let the loop continue walking upward.
         }
 
-        // Only report an error if we definitively hit a function boundary 
-        // without an enclosing loop. Standalone switches/blocks will pass cleanly.
-        if (hitFunctionBoundary && !hasLoop)
+        if (!foundLoop)
         {
           context.report({
             node,

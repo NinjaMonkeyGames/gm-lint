@@ -18,3 +18,10 @@ for (var i = 0; i < 10; i++) {
         continue; // Valid intent if interpreted contextually, but flagged as out-of-loop due to function boundary rules.
     });
 }
+
+// No Trigger
+
+switch (val) {
+    case 1:
+        continue; // Invalid! GameMaker throws a compiler error.
+}

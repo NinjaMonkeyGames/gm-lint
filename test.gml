@@ -1,4 +1,3 @@
-switch (val) {
-    case 1:
-        break; // Invalid! GameMaker throws a compiler error.
+for (var i = 0; i < 10; i++) {
+    var x = (condition) ? (continue) : 0; // Syntax/Parsing edge case
 }
