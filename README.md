@@ -1,6 +1,7 @@
 # README
 
 <!-- markdownlint-disable MD013 -->
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8K025I9TA)
 [![Commitlint](https://github.com/NinjaMonkeyGames/gm-lint/actions/workflows/ci.yaml/badge.svg)](https://github.com/NinjaMonkeyGames/gm-lint/actions/workflows/ci.yaml)
 [![Common Changelog](https://common-changelog.org/badge.svg)](https://common-changelog.org)
 ![Signed Commits](https://img.shields.io/badge/commits-signed-blue.svg)

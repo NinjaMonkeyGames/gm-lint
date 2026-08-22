@@ -6,6 +6,7 @@
     "GM1003": "error",
     "GM1004": "error",
     "GM1005": "error",
+    "GM1006": "error",
     "no-unreachable-code": "warning",
     "no-unused-local-var": "warning"
   }
