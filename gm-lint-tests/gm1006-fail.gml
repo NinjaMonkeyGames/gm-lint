@@ -1,3 +1,7 @@
+// Total[1]
+
+// Trigger
+
 enum FRUIT {
     APPLE,
     ORANGE,
