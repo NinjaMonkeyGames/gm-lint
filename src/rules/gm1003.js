@@ -2,7 +2,7 @@
 
 /**
  * @file ESLint rule to disallow non-integer assignments in enum declarations.
- * @remarks GameMaker equivalent check for enum member initialization values[cite: 13].
+ * @remarks GameMaker equivalent check for enum member initialization values.
  */
 
 /**
@@ -14,28 +14,28 @@ function isIntegerExpression(node)
 {
   if (!node)
   {
-    return true; // No initializer (implicit integer increment) is valid[cite: 13]
+    return true; // No initializer (implicit integer increment) is valid
   }
 
-  // Direct integer literal (e.g., 5, -1, 2.0 where Number.isInteger is true)[cite: 13]
-  if (node.type === 'Literal' && typeof node.value === 'number' && Number.isInteger(node.value))
+  // Direct integer literal (e.g., 5, -1, 2.0 where Number.isInteger is true)
+  if (node.type === 'Literal')
   {
-    return true;
+    return typeof node.value === 'number' && Number.isInteger(node.value);
   }
 
-  // Identifiers or MemberExpressions can be references to other enums, macros, or built-in constants[cite: 13]
+  // Identifiers or MemberExpressions can be references to other enums, macros, or built-in constants
   if (node.type === 'Identifier' || node.type === 'MemberExpression')
   {
     return true;
   }
 
-  // Parenthesized expressions wrapping a valid integer or reference[cite: 13]
+  // Parenthesized expressions wrapping a valid integer or reference
   if (node.type === 'ParenthesizedExpression')
   {
     return isIntegerExpression(node.expression);
   }
 
-  // Unary expression for signed integers or bitwise negation (e.g., -5, +5, ~0)[cite: 13]
+  // Unary expression for signed integers or bitwise negation (e.g., -5, +5, ~0)
   if (
     node.type === 'UnaryExpression' &&
     (node.operator === '-' || node.operator === '+' || node.operator === '~')
@@ -44,7 +44,7 @@ function isIntegerExpression(node)
     return isIntegerExpression(node.argument);
   }
 
-  // Binary expression for arithmetic/bitwise operations[cite: 13]
+  // Binary expression for arithmetic/bitwise operations
   if (node.type === 'BinaryExpression')
   {
     const validOperators = new Set(['+', '-', '*', '/', '%', '<<', '>>', '&', '|', '^', 'div', 'mod']);

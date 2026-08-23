@@ -2,11 +2,9 @@
 
 /**
  * Built-in or known function definitions specifying their minimum required argument counts.
- * This can be expanded or replaced by an external metadata provider.
  */
 const MIN_REQUIRED_ARGS = {
   draw_set_color: 1,
-  // Add other built-ins or custom function requirements here as needed
 };
 
 /**
@@ -29,10 +27,23 @@ export default {
     return {
       CallExpression(node) 
       {
-        // Ensure the callee is a simple identifier (e.g., draw_set_color())
-        if (node.callee && node.callee.type === 'Identifier') 
+        let funcName = null;
+
+        // Support both direct identifiers and member expressions (e.g., utility.draw_set_color())
+        if (node.callee) 
         {
-          const funcName = node.callee.name;
+          if (node.callee.type === 'Identifier') 
+          {
+            funcName = node.callee.name;
+          } 
+          else if (node.callee.type === 'MemberExpression' && node.callee.property.type === 'Identifier') 
+          {
+            funcName = node.callee.property.name;
+          }
+        }
+
+        if (funcName) 
+        {
           const minArgs = MIN_REQUIRED_ARGS[funcName];
 
           if (minArgs !== undefined && node.arguments.length < minArgs) 
