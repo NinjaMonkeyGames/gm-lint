@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @file ESLint rule to disallow inline initializers for globalvar declarations (GM1002).
+ * @remarks GameMaker Language lint rule for globalvar initializers.
+ */
+
 export default {
   id: 'GM1002',
   meta: {
@@ -10,12 +15,20 @@ export default {
     severity: 'error',
   },
   /**
-   *
-   * @param context
+   * Creates the ESLint rule visitor.
+   * @public
+   * @param {object} context - The lint rule context.
+   * @returns {object} The rule listener methods.
    */
   create(context) 
   {
     return {
+      /**
+       * Validates variable declarations to disallow inline initializers for globalvar.
+       * @public
+       * @param {object} node - The VariableDeclaration AST node.
+       * @returns {void}
+       */
       VariableDeclaration(node) 
       {
         if (node.kind !== 'globalvar') 

@@ -1,0 +1,3 @@
+working_directory = @"PlayerData"; // Bad! working_directory is readonly
+var _file = file_find_first(working_directory + @"\Screenshots\*.png", fa_archive);
+// ...

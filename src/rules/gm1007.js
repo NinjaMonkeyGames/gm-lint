@@ -44,8 +44,8 @@ export default {
   id: 'GM1007',
   meta: {
     description:
-      "Left-hand side of an assignment must be a variable. Constants, function calls, " +
-      "and other non-variables cannot be assigned to.",
+      'Left-hand side of an assignment must be a variable. Constants, function calls, ' +
+      'and other non-variables cannot be assigned to.',
     severity: 'error',
   },
 
@@ -70,7 +70,7 @@ export default {
         {
           context.report({
             node: node.left,
-            message: "Left-hand side of an assignment must be a variable.",
+            message: 'Left-hand side of an assignment must be a variable.',
           });
         }
       },

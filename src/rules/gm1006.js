@@ -12,7 +12,7 @@ export default {
   id: 'GM1006',
   meta: {
     severity: 'error',
-    description: "The enum '{name}' has already been previously declared in the project.",
+    description: 'The enum \'{name}\' has already been previously declared in the project.',
   },
   
   /**
