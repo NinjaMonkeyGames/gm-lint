@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "GM1000": "error",
+    "GM1001": "error",
+    "GM1002": "error",
+    "GM1003": "error",
+    "GM1004": "error",
+    "GM1005": "warning",
+    "no-unreachable-code": "warning",
+    "no-unused-local-var": "warning"
+  }
+}

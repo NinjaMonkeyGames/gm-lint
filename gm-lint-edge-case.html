@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameMaker ESLint Rule Edge Case Tracker</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        h1 { font-size: 1.5rem; color: #38bdf8; margin-bottom: 5px; }
+        p.subtitle { color: #94a3b8; font-size: 0.9rem; margin-top: 0; margin-bottom: 20px; }
+        
+        .toolbar { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .controls-bar { background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 25px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; border: 1px solid #334155; }
+        
+        button { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+        button:hover { background: #0ea5e9; }
+        button.secondary { background: #334155; }
+        button.secondary:hover { background: #475569; }
+        
+        input[type="text"], select { background: #0f172a; border: 1px solid #475569; color: #f8fafc; padding: 8px; border-radius: 4px; font-size: 0.85rem; }
+        .search-input { flex-grow: 1; min-width: 220px; font-family: inherit; }
+
+        .rule-section { background: #1e293b; border-radius: 8px; margin-bottom: 20px; padding: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #334155; }
+        .rule-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 10px; margin-bottom: 15px; }
+        .rule-header-left { display: flex; align-items: center; gap: 10px; }
+        .rule-title-input { font-size: 1.1rem; font-weight: bold; background: #0f172a; border: 1px solid #475569; color: #38bdf8; padding: 6px 10px; border-radius: 4px; width: 150px; font-family: monospace; }
+        
+        .edge-case-card { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 12px; margin-bottom: 10px; display: grid; grid-template-columns: 180px 1fr 90px 90px 90px 160px 50px; gap: 12px; align-items: start; }
+        .edge-case-header { display: grid; grid-template-columns: 180px 1fr 90px 90px 90px 160px 50px; gap: 12px; font-size: 0.75rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; padding: 0 4px; }
+        
+        textarea { width: 100%; background: #1e293b; border: 1px solid #475569; color: #f8fafc; padding: 8px; border-radius: 4px; box-sizing: border-box; font-family: monospace; font-size: 0.85rem; }
+        
+        .textarea-wrapper { position: relative; width: 100%; }
+        textarea { resize: vertical; min-height: 55px; max-height: 300px; line-height: 1.4; overflow-y: auto; }
+        .copy-btn { position: absolute; top: 6px; right: 6px; background: #334155; color: #f8fafc; border: none; padding: 3px 6px; font-size: 0.7rem; border-radius: 4px; cursor: pointer; }
+        .copy-btn:hover { background: #0284c7; }
+
+        .checkbox-container { text-align: center; padding-top: 6px; }
+        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #0284c7; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-align: center; display: inline-block; width: 100%; box-sizing: border-box; }
+        .badge-green { background: #065f46; color: #6ee7b7; border: 1px solid #047857; }
+        .badge-amber { background: #b45309; color: #fde68a; border: 1px solid #d97706; }
+        .badge-red { background: #991b1b; color: #fca5a5; border: 1px solid #b91c1c; }
+        .badge-none { background: #334155; color: #94a3b8; }
+
+        .collapse-btn { background: #334155; padding: 4px 8px; font-size: 0.75rem; }
+        .rule-content.collapsed { display: none; }
+
+        #statusMsg { font-size: 0.85rem; color: #34d399; margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>GameMaker ESLint Rule Edge Case Tracker</h1>
+    <p class="subtitle">Saves directly to <code>gm-lint-edge-case-manager.json</code>. Search, sort, and collapse sections easily.</p>
+
+    <div class="toolbar">
+        <button onclick="addRuleGroup()">+ Add New Rule Group</button>
+        <button class="secondary" onclick="exportJSON()">💾 Save / Overwrite JSON File</button>
+        <button class="secondary" onclick="document.getElementById('importFile').click()">📤 Import JSON File</button>
+        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importJSON(event)">
+        <span id="statusMsg"></span>
+    </div>
+
+    <div class="controls-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search descriptions, rule IDs, or snippets..." oninput="renderTracker()">
+        <div>
+            <label style="font-size: 0.85rem; color: #94a3b8; margin-right: 5px;">Sort Rules:</label>
+            <select id="sortSelect" onchange="renderTracker()">
+                <option value="id-asc">Rule ID (Ascending)</option>
+                <option value="id-desc">Rule ID (Descending)</option>
+            </select>
+        </div>
+        <button class="secondary" onclick="toggleAllSections(false)">📁 Collapse All</button>
+        <button class="secondary" onclick="toggleAllSections(true)">📂 Expand All</button>
+    </div>
+
+    <div id="container">
+        <!-- Dynamically rendered rule sections -->
+    </div>
+
+<script>
+    const STORAGE_KEY = 'gm_lint_edge_cases_grouped_traffic_v4';
+    const TARGET_FILENAME = 'gm-lint-edge-case-manager.json';
+    let fileHandle = null;
+    let collapsedState = {}; // Track collapse/expand state per ruleId
+
+    const defaultData = [
+        {
+            ruleId: 'GM1000',
+            cases: [
+                { id: 1, desc: 'Switch-inside-loop break', snippet: 'for(var i=0; i<5; i++) {\n    switch(i) {\n        case 1: break;\n    }\n}', expectedTrigger: false, gmTrigger: false, linterTrigger: false },
+                { id: 2, desc: 'Isolated switch break', snippet: 'switch(val) {\n    case 1: break;\n}', expectedTrigger: true, gmTrigger: true, linterTrigger: true }
+            ]
+        }
+    ];
+
+    function loadData() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : defaultData;
+    }
+
+    function saveData(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data, null, 2));
+    }
+
+    function getTrafficLight(expected, gm, lint) {
+        if (expected === true && gm === true && lint === true)  return { color: 'green', text: 'Pass', badgeClass: 'badge-green' };
+        if (expected === true && gm === true && lint === false) return { color: 'red', text: 'Check Linter', badgeClass: 'badge-red' };
+        if (expected === true && gm === false && lint === true) return { color: 'amber', text: 'Check Linter', badgeClass: 'badge-amber' };
+        if (expected === true && gm === false && lint === false) return { color: 'amber', text: 'Check example', badgeClass: 'badge-amber' };
+        if (expected === false && gm === true && lint === true) return { color: 'green', text: 'Check example', badgeClass: 'badge-green' };
+        if (expected === false && gm === true && lint === false) return { color: 'none', text: 'Check example', badgeClass: 'badge-none' };
+        if (expected === false && gm === false && lint === true) return { color: 'red', text: 'Linter False pos', badgeClass: 'badge-red' };
+        if (expected === false && gm === false && lint === false) return { color: 'green', text: 'Pass', badgeClass: 'badge-green' };
+        return { color: 'none', text: 'Unknown', badgeClass: 'badge-none' };
+    }
+
+    function renderTracker() {
+        let data = loadData();
+        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+        const sortOrder = document.getElementById('sortSelect').value;
+
+        // Sort groups
+        data.sort((a, b) => {
+            if (sortOrder === 'id-asc') return a.ruleId.localeCompare(b.ruleId, undefined, {numeric: true});
+            if (sortOrder === 'id-desc') return b.ruleId.localeCompare(a.ruleId, undefined, {numeric: true});
+        });
+
+        const container = document.getElementById('container');
+        container.innerHTML = '';
+
+        let visibleGroupCount = 0;
+
+        data.forEach((group, groupIndex) => {
+            // Filter cases matching search query
+            const filteredCases = group.cases.filter(item => {
+                return group.ruleId.toLowerCase().includes(searchQuery) ||
+                       item.desc.toLowerCase().includes(searchQuery) ||
+                       item.snippet.toLowerCase().includes(searchQuery);
+            });
+
+            // If a search query is active and nothing matches in this group, skip rendering it
+            if (searchQuery && filteredCases.length === 0) return;
+
+            visibleGroupCount++;
+            const isCollapsed = collapsedState[group.ruleId] || false;
+
+            const section = document.createElement('div');
+            section.className = 'rule-section';
+
+            let casesHTML = `
+                <div class="rule-header">
+                    <div class="rule-header-left">
+                        <button class="collapse-btn" onclick="toggleSection('${escapeHtml(group.ruleId)}')">${isCollapsed ? '📂 Expand' : '📁 Collapse'}</button>
+                        <span style="font-size: 0.85rem; color: #94a3b8; margin-right: 4px;">Rule ID:</span>
+                        <input type="text" class="rule-title-input" value="${escapeHtml(group.ruleId)}" oninput="updateRuleId(${groupIndex}, this.value)">
+                    </div>
+                    <button style="background: #0284c7; padding: 6px 12px; font-size: 0.8rem;" onclick="addCase(${groupIndex})">+ Add Example</button>
+                </div>
+                <div class="rule-content ${isCollapsed ? 'collapsed' : ''}" id="content-${escapeHtml(group.ruleId)}">
+                    <div class="edge-case-header">
+                        <div>Description</div>
+                        <div>GML Example Snippet</div>
+                        <div style="text-align:center;">Expected</div>
+                        <div style="text-align:center;">GM</div>
+                        <div style="text-align:center;">Lint</div>
+                        <div style="text-align:center;">Traffic Light Status</div>
+                        <div style="text-align:center;">Action</div>
+                    </div>
+            `;
+
+            // Use original array indices for proper data binding persistence
+            group.cases.forEach((item, caseIndex) => {
+                // If filtering, hide non-matching rows inside visible groups
+                const matchesSearch = !searchQuery || 
+                    group.ruleId.toLowerCase().includes(searchQuery) ||
+                    item.desc.toLowerCase().includes(searchQuery) ||
+                    item.snippet.toLowerCase().includes(searchQuery);
+
+                if (!matchesSearch) return;
+
+                const traffic = getTrafficLight(item.expectedTrigger, item.gmTrigger, item.linterTrigger);
+                casesHTML += `
+                    <div class="edge-case-card">
+                        <div><input type="text" value="${escapeHtml(item.desc)}" oninput="updateCase(${groupIndex}, ${caseIndex}, 'desc', this.value)"></div>
+                        <div class="textarea-wrapper">
+                            <textarea id="snippet-${groupIndex}-${caseIndex}" oninput="updateCase(${groupIndex}, ${caseIndex}, 'snippet', this.value)">${escapeHtml(item.snippet)}</textarea>
+                            <button class="copy-btn" onclick="copySnippet('snippet-${groupIndex}-${caseIndex}', this)">📋 Copy</button>
+                        </div>
+                        <div class="checkbox-container"><input type="checkbox" ${item.expectedTrigger ? 'checked' : ''} onchange="updateCase(${groupIndex}, ${caseIndex}, 'expectedTrigger', this.checked)"></div>
+                        <div class="checkbox-container"><input type="checkbox" ${item.gmTrigger ? 'checked' : ''} onchange="updateCase(${groupIndex}, ${caseIndex}, 'gmTrigger', this.checked)"></div>
+                        <div class="checkbox-container"><input type="checkbox" ${item.linterTrigger ? 'checked' : ''} onchange="updateCase(${groupIndex}, ${caseIndex}, 'linterTrigger', this.checked)"></div>
+                        <div style="padding-top: 6px;">
+                            <span class="badge ${traffic.badgeClass}">${traffic.text}</span>
+                        </div>
+                        <div style="text-align: center; padding-top: 4px;"><button style="background: #991b1b; padding: 6px 10px;" onclick="deleteCase(${groupIndex}, ${caseIndex})">X</button></div>
+                    </div>
+                `;
+            });
+
+            casesHTML += `</div>`;
+            section.innerHTML = casesHTML;
+            container.appendChild(section);
+        });
+
+        if (visibleGroupCount === 0) {
+            container.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 40px;">No matching rule groups found.</div>`;
+        }
+    }
+
+    function toggleSection(ruleId) {
+        collapsedState[ruleId] = !collapsedState[ruleId];
+        renderTracker();
+    }
+
+    function toggleAllSections(expand) {
+        const data = loadData();
+        data.forEach(group => {
+            collapsedState[group.ruleId] = !expand;
+        });
+        renderTracker();
+    }
+
+    function copySnippet(elementId, btnElement) {
+        const textarea = document.getElementById(elementId);
+        navigator.clipboard.writeText(textarea.value).then(() => {
+            const originalText = btnElement.textContent;
+            btnElement.textContent = '✔ Copied!';
+            btnElement.style.background = '#065f46';
+            setTimeout(() => {
+                btnElement.textContent = originalText;
+                btnElement.style.background = '#334155';
+            }, 2000);
+        });
+    }
+
+    function updateRuleId(groupIndex, value) {
+        const data = loadData();
+        data[groupIndex].ruleId = value;
+        saveData(data);
+    }
+
+    function updateCase(groupIndex, caseIndex, field, value) {
+        const data = loadData();
+        data[groupIndex].cases[caseIndex][field] = value;
+        saveData(data);
+        if (field !== 'snippet') {
+            renderTracker();
+        }
+    }
+
+    function addCase(groupIndex) {
+        const data = loadData();
+        data[groupIndex].cases.push({
+            desc: 'New test case',
+            snippet: '// GML snippet here',
+            expectedTrigger: true,
+            gmTrigger: true,
+            linterTrigger: false
+        });
+        saveData(data);
+        renderTracker();
+    }
+
+    function deleteCase(groupIndex, caseIndex) {
+        const data = loadData();
+        data[groupIndex].cases.splice(caseIndex, 1);
+        if (data[groupIndex].cases.length === 0) {
+            data.splice(groupIndex, 1);
+        }
+        saveData(data);
+        renderTracker();
+    }
+
+    function addRuleGroup() {
+        const data = loadData();
+        data.push({
+            ruleId: 'GM100X',
+            cases: [
+                { desc: 'Initial test case', snippet: '// GML snippet here', expectedTrigger: true, gmTrigger: true, linterTrigger: true }
+            ]
+        });
+        saveData(data);
+        renderTracker();
+    }
+
+    async function exportJSON() {
+        const data = loadData();
+        const jsonString = JSON.stringify(data, null, 2);
+        const statusEl = document.getElementById('statusMsg');
+
+        try {
+            if (window.showSaveFilePicker) {
+                if (!fileHandle) {
+                    const options = {
+                        suggestedName: TARGET_FILENAME,
+                        types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
+                    };
+                    fileHandle = await window.showSaveFilePicker(options);
+                }
+                const writable = await fileHandle.createWritable();
+                await writable.write(jsonString);
+                await writable.close();
+                
+                statusEl.textContent = `✔ Successfully overwritten ${TARGET_FILENAME}!`;
+                setTimeout(() => statusEl.textContent = '', 3000);
+                return;
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.warn('FilePicker error, falling back to standard download:', err);
+            } else {
+                return;
+            }
+        }
+
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = TARGET_FILENAME;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        statusEl.textContent = `✔ Downloaded ${TARGET_FILENAME}!`;
+        setTimeout(() => statusEl.textContent = '', 3000);
+    }
+
+    function importJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                saveData(parsed);
+                renderTracker();
+                document.getElementById('statusMsg').textContent = '✔ Imported successfully!';
+                setTimeout(() => document.getElementById('statusMsg').textContent = '', 3000);
+            } catch (err) {
+                alert('Invalid JSON file format.');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function escapeHtml(str) {
+        return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    renderTracker();
+</script>
+
+</body>
+</html>

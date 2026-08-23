@@ -20,24 +20,6 @@ const CONTINUE_TARGETS = new Set([
   'WithStatement',
 ]);
 
-/**
- * Determines if a function-like node is an inline callback expression 
- * (e.g. passed into a method or function call) rather than a standalone declaration.
- * @param {object} anc - The ancestor function node.
- * @param {object[]} ancestors - The full ancestor array.
- * @param {number} index - The current index of the ancestor in the array.
- * @returns {boolean} True if it acts as an inline callback.
- */
-function isInlineCallback(anc, ancestors, index) 
-{
-  if (anc.type !== 'FunctionExpression') 
-  {
-    return false;
-  }
-  const parent = ancestors[index + 1];
-  return parent && (parent.type === 'CallExpression' || parent.type === 'Property');
-}
-
 export default {
   id: 'GM1001',
   meta: {
@@ -72,21 +54,20 @@ export default {
         {
           const anc = ancestors[i];
 
-          // 1. If it's a valid loop target, we are good!
+          // 1. If it's a valid loop target reached without crossing a
+          // function boundary, we are good!
           if (CONTINUE_TARGETS.has(anc.type))
           {
             foundLoop = true;
             break; 
           }
 
-          // 2. If it's a function boundary, check if it's a transparent inline callback
+          // 2. A function boundary (including IIFEs/inline callbacks) always
+          // stops the search - 'continue' can never reach outside the
+          // function it's lexically written in.
           if (isFunctionLike(anc))
           {
-            if (isInlineCallback(anc, ancestors, i))
-            {
-              continue; // transparent, keep scanning outward
-            }
-            break; // true function boundary, stop scanning
+            break;
           }
 
           // 3. For everything else (SwitchStatement, SwitchCase, BlockStatement, etc.), 

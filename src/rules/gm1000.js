@@ -21,24 +21,6 @@ const BREAK_TARGETS = new Set([
   'SwitchStatement',
 ]);
 
-/**
- * Determines if a function-like node is an inline callback expression 
- * (e.g. passed into a method or function call) rather than a standalone declaration.
- * @param {object} anc - The ancestor function node.
- * @param {object[]} ancestors - The full ancestor array.
- * @param {number} index - The current index of the ancestor in the array.
- * @returns {boolean} True if it acts as an inline callback.
- */
-function isInlineCallback(anc, ancestors, index) 
-{
-  if (anc.type !== 'FunctionExpression') 
-  {
-    return false;
-  }
-  const parent = ancestors[index + 1];
-  return parent && (parent.type === 'CallExpression' || parent.type === 'Property');
-}
-
 export default {
   id: 'GM1000',
   meta: {
@@ -67,40 +49,30 @@ export default {
        */
       BreakStatement(node, parent, ancestors)
       {
-        let hasTarget = false;
-        let hitFunctionBoundary = false;
-
+        // Traverse backwards through ancestors to find a loop or switch target.
+        // A function boundary (including IIFEs/inline callbacks) always stops
+        // the search - GameMaker never lets 'break' reach outside the function
+        // it's lexically written in, regardless of what encloses that function.
         for (let i = ancestors.length - 1; i >= 0; i--)
         {
           const anc = ancestors[i];
 
           if (BREAK_TARGETS.has(anc.type))
           {
-            hasTarget = true;
-            break;
+            return; // Valid loop or switch found enclosing this break statement
           }
 
           if (isFunctionLike(anc))
           {
-            if (isInlineCallback(anc, ancestors, i))
-            {
-              continue; // Transparent callback, keep looking outward
-            }
-            hitFunctionBoundary = true;
-            break; // Hit a true function boundary
+            break; // Function boundary - stop searching outward
           }
         }
 
-        // Only report an error if we definitively hit a function boundary 
-        // without an enclosing loop or switch target.
-        if (hitFunctionBoundary && !hasTarget)
-        {
-          context.report({
-            node,
-            message: 'No enclosing loop or switch from which to break. Remove this \'break\' or move it ' +
-              'inside a loop (for/while/do-until/repeat/with) or switch statement.',
-          });
-        }
+        context.report({
+          node,
+          message: 'No enclosing loop or switch from which to break. Remove this \'break\' or move it ' +
+            'inside a loop (for/while/do-until/repeat/with) or switch statement.',
+        });
       },
     };
   },
