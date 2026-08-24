@@ -1,87 +1,59 @@
 'use strict';
 
-/**
- * @file ESLint rule to disallow continue statements outside of loops.
- * @remarks GameMaker equivalent check for continue validity.
- */
-
 import { isFunctionLike } from './_util.js';
 
-/**
- * Continue targets accepted by GameMaker.
- * @type {Set<string>}
- * @constant
- */
+// Unlike break, continue is transparent through switch: `continue` inside
+// a switch-inside-a-loop continues the loop, so SwitchStatement is not a
+// valid target on its own - we just skip over it while searching outward.
 const CONTINUE_TARGETS = new Set([
-  'ForStatement',
-  'WhileStatement',
-  'DoUntilStatement',
-  'RepeatStatement',
-  'WithStatement',
+  'ForStatement', 'WhileStatement', 'DoUntilStatement', 'RepeatStatement', 'WithStatement',
 ]);
 
 export default {
   id: 'GM1001',
   meta: {
     description:
-      'No enclosing loop from which to continue. \'continue\' must appear inside the body of a ' +
-      'loop (for/while/do-until/repeat/with).',
+      'No enclosing loop from which to continue. \'continue\' must appear inside the body ' +
+      'of a for/while/do-until/repeat/with loop - using it anywhere else (including bare ' +
+      'inside a switch with no surrounding loop) is a compile error in GameMaker.',
     severity: 'error',
   },
-
   /**
-   * Creates the rule visitor.
-   * @public
-   * @param {object} context - The lint rule context.
-   * @returns {object} The rule listener methods.
+   * Creates the lint rule visitor handlers for detecting continue
+   * statements with no valid enclosing loop.
+   * @param {object} context - The linting context providing reporting utilities.
+   * @returns {object} An object mapping AST node types to visitor functions.
    */
   create(context)
   {
     return {
       /**
-       * Validates continue statement placements.
-       * @public
-       * @param {object} node - The continue node.
-       * @param {object} parent - The parent node.
-       * @param {object[]} ancestors - The ancestor nodes.
+       * Walks up from a continue statement looking for a qualifying
+       * ancestor before hitting a function boundary.
+       * @param {object} node - The ContinueStatement node being visited.
+       * @param {object} parent - The immediate parent node.
+       * @param {object[]} ancestors - Ancestors of `node`, root first.
        * @returns {void}
        */
       ContinueStatement(node, parent, ancestors)
       {
-        let foundLoop = false;
-
         for (let i = ancestors.length - 1; i >= 0; i--)
         {
           const anc = ancestors[i];
-
-          // 1. If it's a valid loop target reached without crossing a
-          // function boundary, we are good!
-          if (CONTINUE_TARGETS.has(anc.type))
-          {
-            foundLoop = true;
-            break; 
-          }
-
-          // 2. A function boundary (including IIFEs/inline callbacks) always
-          // stops the search - 'continue' can never reach outside the
-          // function it's lexically written in.
           if (isFunctionLike(anc))
           {
-            break;
+            break; // can't reach past a function boundary
           }
-
-          // 3. For everything else (SwitchStatement, SwitchCase, BlockStatement, etc.), 
-          // do nothing and let the loop continue walking upward.
+          if (CONTINUE_TARGETS.has(anc.type))
+          {
+            return; // valid
+          }
         }
-
-        if (!foundLoop)
-        {
-          context.report({
-            node,
-            message: 'No enclosing loop from which to continue. Remove this \'continue\' or move it ' +
-              'inside a for/while/do-until/repeat/with loop.',
-          });
-        }
+        context.report({
+          node,
+          message: 'No enclosing loop from which to continue. Remove this \'continue\' or move ' +
+            'it inside a for/while/do-until/repeat/with loop.',
+        });
       },
     };
   },

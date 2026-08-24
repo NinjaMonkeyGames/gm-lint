@@ -1,77 +1,60 @@
 'use strict';
 
-/**
- * @file ESLint rule to disallow break statements outside of loops or switch statements.
- * @remarks GameMaker equivalent check for break validity.
- */
-
 import { isFunctionLike } from './_util.js';
 
-/**
- * Break targets accepted by GameMaker (loops and switch statements).
- * @type {Set<string>}
- * @constant
- */
+// break may exit any of these. Per the GameMaker manual, `with` counts as
+// a loop for this purpose (it's implemented as one internally), and
+// `switch` accepts break the same way it does in C/JS.
 const BREAK_TARGETS = new Set([
-  'ForStatement',
-  'WhileStatement',
-  'DoUntilStatement',
-  'RepeatStatement',
-  'WithStatement',
-  'SwitchStatement',
+  'ForStatement', 'WhileStatement', 'DoUntilStatement', 'RepeatStatement',
+  'WithStatement', 'SwitchStatement',
 ]);
 
 export default {
   id: 'GM1000',
   meta: {
     description:
-      'No enclosing loop or switch from which to break. \'break\' must appear inside the body ' +
-      'of a loop or switch statement - using it anywhere else is a compile error in GameMaker.',
+      'No enclosing loop from which to break. \'break\' must appear inside the body of a ' +
+      'loop (for/while/do-until/repeat/with) or a switch statement - using it anywhere ' +
+      'else is a compile error in GameMaker.',
     severity: 'error',
   },
-
   /**
-   * Creates the ESLint rule visitor.
-   * @public
-   * @param {object} context - The lint rule context.
-   * @returns {object} The rule listener methods.
+   * Creates the lint rule visitor handlers for detecting break statements
+   * with no valid enclosing loop or switch.
+   * @param {object} context - The linting context providing reporting utilities.
+   * @returns {object} An object mapping AST node types to visitor functions.
    */
   create(context)
   {
     return {
       /**
-       * Validates break statement placements.
-       * @public
-       * @param {object} node - The break node.
-       * @param {object} parent - The parent node.
-       * @param {object[]} ancestors - The ancestor nodes.
+       * Walks up from a break statement looking for a qualifying ancestor
+       * before hitting a function boundary.
+       * @param {object} node - The BreakStatement node being visited.
+       * @param {object} parent - The immediate parent node.
+       * @param {object[]} ancestors - Ancestors of `node`, root first.
        * @returns {void}
        */
       BreakStatement(node, parent, ancestors)
       {
-        // Traverse backwards through ancestors to find a loop or switch target.
-        // A function boundary (including IIFEs/inline callbacks) always stops
-        // the search - GameMaker never lets 'break' reach outside the function
-        // it's lexically written in, regardless of what encloses that function.
         for (let i = ancestors.length - 1; i >= 0; i--)
         {
           const anc = ancestors[i];
-
-          if (BREAK_TARGETS.has(anc.type))
-          {
-            return; // Valid loop or switch found enclosing this break statement
-          }
-
+          // A break can't reach past a function boundary to an outer loop.
           if (isFunctionLike(anc))
           {
-            break; // Function boundary - stop searching outward
+            break;
+          }
+          if (BREAK_TARGETS.has(anc.type))
+          {
+            return; // valid
           }
         }
-
         context.report({
           node,
-          message: 'No enclosing loop or switch from which to break. Remove this \'break\' or move it ' +
-            'inside a loop (for/while/do-until/repeat/with) or switch statement.',
+          message: 'No enclosing loop from which to break. Remove this \'break\' or move it ' +
+            'inside a for/while/do-until/repeat/with loop or a switch statement.',
         });
       },
     };
