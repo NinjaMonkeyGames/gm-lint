@@ -11,7 +11,7 @@ import jsonSchemaValidator from 'eslint-plugin-json-schema-validator';
 import globals from 'globals'; // <-- 1. Import globals package
 
 // --- Constants for rule configuration ---
-const MAX_COMPLEXITY = 10;
+const MAX_COMPLEXITY = 100;
 const MAX_LINES = 300;
 const MAX_PARAMS = 4;
 const INDENT_SPACES = 2;

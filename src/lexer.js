@@ -91,10 +91,10 @@ function isIdentPart(ch)
  * while flagging syntax problems).
  * @public
  * @param {string} source - The raw GML source text.
- * @returns {{ tokens: object[], errors: GmlSyntaxError[] }} Tokenized array and any collected syntax errors.
+ * @returns {{ tokens: Array<{ type: string, value: string|null, line: number, column: number }>, errors: GmlSyntaxError[] }} Tokenized array and any collected syntax errors.
  */
 /* eslint-disable complexity */
-function tokenize(source) 
+function tokenize(source)
 {
   const tokens = [];
   const errors = [];

@@ -52,8 +52,8 @@ export default {
   id: 'GM1008',
   meta: {
     description:
-      "The variable is readonly and cannot be assigned to. Built-in read-only variables " +
-      "like working_directory cannot have their values directly modified.",
+      'The variable is readonly and cannot be assigned to. Built-in read-only variables ' +
+      'like working_directory cannot have their values directly modified.',
     severity: 'error',
   },
 
